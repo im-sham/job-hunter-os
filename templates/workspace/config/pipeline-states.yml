@@ -1,0 +1,78 @@
+version: 1
+
+owners:
+  - assistant
+  - human
+
+canonical_states:
+  - researching
+  - evaluated
+  - preparing
+  - resume-ready
+  - cover-letter-needed
+  - application-ready
+  - submission-in-progress
+  - awaiting-user-confirmation
+  - submitted
+  - interviewing
+  - offer
+  - rejected
+  - withdrawn
+  - closed
+  - skip
+
+phase_owner_map:
+  researching: assistant
+  evaluated: human
+  preparing: assistant
+  resume-ready: assistant
+  cover-letter-needed: assistant
+  application-ready: human
+  submission-in-progress: assistant
+  awaiting-user-confirmation: human
+  submitted: human
+  interviewing: human
+  offer: human
+  rejected: human
+  withdrawn: human
+  closed: human
+  skip: human
+
+allowed_transitions:
+  researching:
+    - evaluated
+    - skip
+  evaluated:
+    - preparing
+    - skip
+  preparing:
+    - resume-ready
+    - withdrawn
+  resume-ready:
+    - cover-letter-needed
+    - application-ready
+  cover-letter-needed:
+    - application-ready
+  application-ready:
+    - submission-in-progress
+    - awaiting-user-confirmation
+    - submitted
+  submission-in-progress:
+    - awaiting-user-confirmation
+    - submitted
+  awaiting-user-confirmation:
+    - submission-in-progress
+    - submitted
+  submitted:
+    - interviewing
+    - offer
+    - rejected
+  interviewing:
+    - offer
+    - rejected
+  offer: []
+  rejected: []
+  withdrawn: []
+  closed: []
+  skip: []
+

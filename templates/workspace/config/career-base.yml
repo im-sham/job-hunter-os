@@ -1,0 +1,18 @@
+version: 1
+
+candidate:
+  full_name: Your Name
+  headline: Your target role or professional headline
+  location: Your City, ST
+
+source_documents: []
+
+output_targets:
+  experience_inventory: data/career-base/experience-inventory.yml
+  master_experience_document: data/career-base/master-experience.md
+
+status:
+  import_complete: false
+  chronology_reviewed: false
+  metrics_reviewed: false
+

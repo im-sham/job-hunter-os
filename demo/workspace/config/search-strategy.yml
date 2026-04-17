@@ -1,0 +1,49 @@
+version: 1
+
+lanes:
+  - name: Applied AI operations
+    slug: applied-ai-ops
+  - name: Fintech operating systems
+    slug: fintech-ops
+  - name: Customer operations leadership
+    slug: customer-ops
+
+company_stage_mix:
+  large-platform: 0.25
+  scale-up: 0.5
+  early-stage: 0.25
+
+geography:
+  preferred:
+    - New York City
+    - Remote US
+  acceptable:
+    - Bay Area
+    - Boston
+  blocked:
+    - Relocation outside the United States
+
+work_mode_preferences:
+  - hybrid
+  - remote
+
+compensation:
+  target_base_usd: 190000
+  exception_floor_usd: 145000
+
+step_down_logic:
+  - Accept up to a 15 percent step-down for exceptional AI brand, scope growth, or access to a world-class operator seat.
+  - Accept hybrid-only roles when commute burden stays manageable and the scope is clearly stronger than remote alternatives.
+
+scoring_weights:
+  capability_fit: 35
+  screen_odds: 30
+  upside: 20
+  compensation: 10
+  logistics: 5
+
+thresholds:
+  pursue_now: 80
+  selective_pursue: 68
+  hold: 55
+

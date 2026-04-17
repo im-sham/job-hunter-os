@@ -1,0 +1,27 @@
+version: 1
+
+candidate:
+  full_name: Alex Morgan
+  headline: Strategy and operations leader for AI, fintech, and service-heavy teams
+  location: Brooklyn, NY
+
+source_documents:
+  - id: resume-general
+    kind: resume
+    filename: alex_morgan_resume_general.pdf
+  - id: resume-fintech
+    kind: resume
+    filename: alex_morgan_resume_fintech.pdf
+  - id: linkedin-export
+    kind: linkedin
+    filename: linkedin_profile.txt
+
+output_targets:
+  experience_inventory: data/career-base/experience-inventory.yml
+  master_experience_document: data/career-base/master-experience.md
+
+status:
+  import_complete: true
+  chronology_reviewed: true
+  metrics_reviewed: true
+

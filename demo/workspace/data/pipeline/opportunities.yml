@@ -1,0 +1,94 @@
+version: 1
+
+opportunities:
+  - id: demo-101
+    company: Beacon AI
+    role: Strategic Operations Lead
+    application_url: https://boards.greenhouse.io/beaconai/jobs/4881001
+    source_url: https://boards.greenhouse.io/beaconai/jobs/4881001
+    source_site: greenhouse
+    location: New York, NY
+    location_type: hybrid
+    employment: full-time
+    compensation: $210K-$240K base + equity
+    phase: application-ready
+    human_gate: false
+    next_step: Final human review, then submit with calibrated resume package.
+    strategy:
+      lane: applied-ai-ops
+      company_stage: scale-up
+      work_mode: hybrid
+    score:
+      capability_fit: 9
+      screen_odds: 8
+      upside: 9
+      compensation: 8
+      logistics: 8
+  - id: demo-102
+    company: LedgerLoop
+    role: Senior Business Operations Manager
+    application_url: https://jobs.ashbyhq.com/ledgerloop/3d86c8f4-ops
+    source_url: https://jobs.ashbyhq.com/ledgerloop/3d86c8f4-ops
+    source_site: ashby
+    location: Remote (US)
+    location_type: remote
+    employment: full-time
+    compensation: $175K-$200K base
+    phase: evaluated
+    human_gate: false
+    next_step: Decide whether to invest in a tailored package this week.
+    strategy:
+      lane: fintech-ops
+      company_stage: scale-up
+      work_mode: remote
+    score:
+      capability_fit: 8
+      screen_odds: 7
+      upside: 8
+      compensation: 7
+      logistics: 8
+  - id: demo-103
+    company: Northwind Health
+    role: Customer Operations Director
+    source_url: https://jobs.lever.co/northwindhealth/customer-operations-director
+    source_site: lever
+    location: Remote (US)
+    location_type: remote
+    employment: full-time
+    compensation: Not listed
+    phase: researching
+    human_gate: false
+    next_step: Keep in backlog until a stronger comp or scope signal appears.
+    strategy:
+      lane: customer-ops
+      company_stage: large-platform
+      work_mode: remote
+    score:
+      capability_fit: 6
+      screen_odds: 5
+      upside: 6
+      compensation: 7
+      logistics: 7
+  - id: demo-104
+    company: Atlas Civic Systems
+    role: Head of Service Operations
+    application_url: https://apply.workable.com/atlas-civic-systems/j/1C8EF0A94B
+    source_url: https://apply.workable.com/atlas-civic-systems/j/1C8EF0A94B
+    source_site: workable
+    location: Washington, DC
+    location_type: hybrid
+    employment: full-time
+    compensation: $185K-$215K base
+    phase: awaiting-user-confirmation
+    human_gate: true
+    next_step: Human review required for compensation expectations before submission can continue.
+    strategy:
+      lane: customer-ops
+      company_stage: early-stage
+      work_mode: hybrid
+    score:
+      capability_fit: 8
+      screen_odds: 8
+      upside: 7
+      compensation: 6
+      logistics: 6

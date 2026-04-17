@@ -1,0 +1,28 @@
+version: 1
+
+review_policy:
+  require_human_review: true
+  minimum_signal_count: 5
+
+events:
+  - id: evt-001
+    date: 2026-04-03
+    type: submitted
+    opportunity_id: demo-101
+    notes: Strong fit with a high-upside AI operations role.
+  - id: evt-002
+    date: 2026-04-05
+    type: skip
+    opportunity_id: demo-103
+    notes: Good mission but too much title and comp friction.
+  - id: evt-003
+    date: 2026-04-07
+    type: responded
+    opportunity_id: demo-102
+    notes: Recruiter requested an intro call.
+  - id: evt-004
+    date: 2026-04-10
+    type: interviewing
+    opportunity_id: demo-104
+    notes: Moved into hiring-manager round after first screen.
+

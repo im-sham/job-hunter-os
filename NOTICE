@@ -1,0 +1,25 @@
+Job Hunter OS
+Copyright (c) 2026 USMI Labs and contributors
+
+Created and maintained by Shamim Rehman under the USMI Labs umbrella.
+
+This repository is licensed under the GNU Affero General Public License,
+version 3 only ("AGPL-3.0-only"). See the LICENSE file at the root of
+this repository.
+
+The project name, logos, and related brand identifiers are not granted
+under the software license. See TRADEMARKS.md for branding guidance.
+
+Third-party dependency notes for the current scaffold:
+- js-yaml: MIT
+- mammoth: BSD-2-Clause
+- jszip: used transitively and treated under its MIT option
+
+Additional transitive dependencies may carry their own notices and
+licenses. See package-lock.json and installed package metadata for the
+current dependency graph.
+
+Demo workspace content, templates, and sample assets in this repository
+are intended to be sanitized examples for public use. They must not be
+treated as real personal candidate materials, recruiter communications,
+or private operating data.

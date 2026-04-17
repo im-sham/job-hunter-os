@@ -1,0 +1,36 @@
+version: 1
+
+roles:
+  - company: Northstar Payments
+    title: Director of Strategy and Operations
+    start: 2021-03
+    end: 2025-01
+    highlights:
+      - Built a weekly operating review that cut escalation resolution time by 38 percent.
+      - Led pricing, support, and onboarding workflows across product, finance, and operations.
+  - company: Orbit Health
+    title: Senior Program Manager
+    start: 2018-06
+    end: 2021-02
+    highlights:
+      - Launched a service recovery program that reduced churn in the highest-risk segment.
+      - Built metrics and staffing models for support and implementation teams.
+  - company: CivicFlow
+    title: Operations Manager
+    start: 2015-08
+    end: 2018-05
+    highlights:
+      - Ran pilot rollouts across public-sector partners with heavy cross-functional coordination.
+
+metrics_inventory:
+  - Reduced escalation resolution time by 38 percent
+  - Improved support-team planning accuracy by 22 percent
+  - Increased onboarding conversion by 17 percent
+
+skills_map:
+  - operating cadence design
+  - metrics and forecasting
+  - customer operations
+  - cross-functional execution
+  - process redesign
+

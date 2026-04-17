@@ -1,0 +1,38 @@
+version: 1
+
+contact:
+  email: alex@example.com
+  phone: 555-0100
+  linkedin_url: https://linkedin.com/in/alexmorgan
+  portfolio_url: https://alexmorgan.example.com
+
+safe_answers:
+  current_city: New York
+  current_country: United States
+  github_url: https://github.com/alexmorgan
+  relocation: Open to relocation for exceptional roles with clear scope expansion.
+  work_mode_preference: Hybrid or remote preferred.
+  start_date: Happy to discuss timing based on interview process and notice requirements.
+  referral_source: Direct application through the company careers page.
+  portfolio_url: https://alexmorgan.example.com
+  linkedin_url: https://linkedin.com/in/alexmorgan
+
+human_gated_fields:
+  work_authorization: human_review_required
+  sponsorship: human_review_required
+  eeo: human_review_required
+  disability_status: human_review_required
+  veteran_status: human_review_required
+  criminal_history: human_review_required
+  compensation_expectation: human_review_required
+
+guardrails:
+  never_auto_submit_without_human_confirmation: true
+  never_auto_answer:
+    - work authorization
+    - sponsorship
+    - eeo
+    - disability status
+    - veteran status
+    - criminal history
+    - compensation expectations

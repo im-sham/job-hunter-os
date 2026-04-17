@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Job Hunter OS</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section id="desktop-banner" class="desktop-banner hidden">
+        <div>
+          <p class="eyebrow">Desktop App</p>
+          <h2>Running locally on this computer</h2>
+          <p id="desktop-storage-copy" class="muted-copy"></p>
+          <p id="desktop-workspace-copy" class="desktop-path"></p>
+        </div>
+        <div class="hero-actions">
+          <button id="desktop-open-workspace" class="secondary-button" type="button">Open Workspace Folder</button>
+          <button id="desktop-reset-workspace" class="ghost-button" type="button">Reset Workspace</button>
+        </div>
+      </section>
+
+      <section class="hero">
+          <div class="hero-top">
+            <div>
+              <p class="eyebrow">Job Hunter OS</p>
+              <h1 id="candidate-name">Loading workspace...</h1>
+            <p id="candidate-headline" class="headline"></p>
+            <p class="hero-intro">
+              A local-first assistant for job search setup, reusable materials, and human-reviewed application prep.
+            </p>
+            </div>
+            <div class="hero-actions">
+              <button id="copy-agent-brief-hero" class="primary-button" type="button">Choose Assistant</button>
+            </div>
+          </div>
+        <div class="hero-meta">
+          <span>Local-first</span>
+          <span>Human-reviewed sensitive answers</span>
+          <span id="workspace-path-pill">Stored locally</span>
+        </div>
+        <div class="hero-progress">
+          <div class="progress-copy">
+            <strong id="onboarding-progress">0/6 steps complete</strong>
+            <span id="current-focus">Preparing your first step</span>
+          </div>
+          <div class="progress-track" aria-hidden="true">
+            <div id="progress-fill" class="progress-fill"></div>
+          </div>
+        </div>
+        <div id="status-banner" class="status-banner hidden"></div>
+      </section>
+
+      <section class="view-nav-shell">
+        <div class="view-nav" role="tablist" aria-label="Job Hunter OS sections">
+          <button id="view-tab-setup" class="view-tab active" type="button" role="tab" aria-selected="true" data-view-target="setup">
+            <span class="view-tab-label">Setup</span>
+            <strong>Build your foundation</strong>
+            <small id="view-tab-copy-setup">0/6 ready</small>
+          </button>
+          <button id="view-tab-jobs" class="view-tab" type="button" role="tab" aria-selected="false" data-view-target="jobs">
+            <span class="view-tab-label">Jobs</span>
+            <strong>Find and review roles</strong>
+            <small id="view-tab-copy-jobs">No jobs yet</small>
+          </button>
+          <button id="view-tab-apply" class="view-tab" type="button" role="tab" aria-selected="false" data-view-target="apply">
+            <span class="view-tab-label">Apply</span>
+            <strong>Finish one application</strong>
+            <small id="view-tab-copy-apply">No active runs</small>
+          </button>
+          <button id="view-tab-workspace" class="view-tab" type="button" role="tab" aria-selected="false" data-view-target="workspace">
+            <span class="view-tab-label">Workspace</span>
+            <strong>Progress and details</strong>
+            <small id="view-tab-copy-workspace">Local workspace</small>
+          </button>
+        </div>
+      </section>
+
+      <section id="view-context-panel" class="panel view-context-panel">
+        <p id="view-context-label" class="eyebrow">Setup</p>
+        <h2 id="view-context-title">Build your foundation once</h2>
+        <p id="view-context-copy" class="panel-intro"></p>
+      </section>
+
+      <section class="grid primary-grid" data-view-section="setup">
+        <article class="panel span-2">
+          <div class="panel-head">
+            <h2>Setup Journey</h2>
+            <span id="wizard-count" class="pill"></span>
+          </div>
+          <p class="muted-copy panel-intro">
+            Start with the highlighted step below. You do not need to know the internal system terms to use this app.
+          </p>
+          <div id="wizard-grid" class="wizard-grid"></div>
+        </article>
+
+        <article class="panel quick-start-panel">
+          <div class="panel-head">
+            <h2>Start Here</h2>
+            <span id="doctor-pill" class="pill"></span>
+          </div>
+          <p id="doctor-summary" class="muted-copy"></p>
+          <div id="next-actions-list" class="checklist"></div>
+          <div class="action-row">
+            <button id="jump-to-current-step" class="primary-button" type="button">Open Current Step</button>
+            <button id="refresh-button" class="secondary-button" type="button">Refresh</button>
+          </div>
+        </article>
+      </section>
+
+      <section class="flow-stack">
+        <article id="agent-panel" class="panel step-panel setup-step-panel" data-view-section="setup">
+          <div class="step-head">
+            <div class="step-title-wrap">
+              <span class="step-number">1</span>
+              <div>
+                <p class="step-label">Step 1</p>
+                <h2>Choose Your Assistant</h2>
+              </div>
+            </div>
+            <span class="pill accent">Used throughout</span>
+          </div>
+          <p class="muted-copy panel-intro">
+            Choose the assistant you already use first. The app will use this choice throughout sourcing, browser fallback, and any later help steps. You can change it anytime.
+          </p>
+          <label class="inline-label">
+            Which assistant are you using?
+            <select id="assistant-id"></select>
+          </label>
+          <p id="assistant-summary" class="muted-copy"></p>
+          <div id="assistant-badges" class="chip-list"></div>
+
+          <div class="divider"></div>
+          <div class="panel-head compact">
+            <h2>What we recommend</h2>
+            <span id="assistant-path-pill" class="pill"></span>
+          </div>
+          <div id="assistant-guidance" class="checklist"></div>
+          <div class="divider"></div>
+          <div class="panel-head compact">
+            <h2>What to do next</h2>
+          </div>
+          <div id="agent-steps" class="checklist"></div>
+
+          <details class="advanced-details">
+            <summary>Advanced assistant setup</summary>
+            <div class="details-body">
+              <label class="inline-label">
+                Connection path
+                <select id="agent-mode">
+                  <option value="folder_access">Folder-connected assistant</option>
+                  <option value="chat_upload">Upload files to a chat assistant</option>
+                </select>
+              </label>
+              <p id="agent-mode-note" class="muted-copy"></p>
+              <p id="agent-summary" class="muted-copy"></p>
+              <div id="agent-examples" class="chip-list"></div>
+              <div class="divider"></div>
+              <div class="panel-head compact">
+                <h2>Advanced notes</h2>
+              </div>
+              <div id="assistant-advanced" class="checklist"></div>
+              <div class="divider"></div>
+              <div class="panel-head compact">
+                <h2>Your review controls</h2>
+              </div>
+              <div id="agent-controls" class="checklist"></div>
+              <div class="divider"></div>
+              <div class="panel-head compact">
+                <h2>Message you can copy</h2>
+                <button id="copy-agent-prompt" class="secondary-button" type="button">Copy</button>
+              </div>
+              <textarea id="agent-prompt" rows="16" readonly></textarea>
+            </div>
+          </details>
+        </article>
+
+        <article id="import-career-panel" class="panel step-panel setup-step-panel" data-view-section="setup">
+          <div class="step-head">
+            <div class="step-title-wrap">
+              <span class="step-number">2</span>
+              <div>
+                <p class="step-label">Step 2</p>
+                <h2>Tell Us About Your Background</h2>
+              </div>
+            </div>
+            <span id="career-source-count" class="pill"></span>
+          </div>
+          <p class="muted-copy panel-intro">
+            Add resumes, LinkedIn exports, or short bios. The app uses these to build a clean source-of-truth background file.
+          </p>
+          <form id="career-import-form" class="stack-form">
+            <label>
+              What are you importing?
+              <span class="field-help">Pick the option that best matches what you are adding.</span>
+              <select id="career-kind" name="kind">
+                <option value="resume">Resume</option>
+                <option value="linkedin">LinkedIn export</option>
+                <option value="bio">Short bio</option>
+                <option value="other">Something else</option>
+              </select>
+            </label>
+            <label>
+              Optional short label
+              <span class="field-help">Helpful if you want to remember where this came from later.</span>
+              <input id="career-label" name="label" type="text" placeholder="resume-2026" />
+            </label>
+            <label>
+              Upload a file
+              <span class="field-help">Supported: .txt, .md, .html, .json, .docx</span>
+              <input id="career-file" name="file" type="file" accept=".txt,.md,.html,.htm,.json,.docx" />
+            </label>
+            <label>
+              Or paste the text directly
+              <span class="field-help">Paste resume text, LinkedIn experience, or a bio summary.</span>
+              <textarea id="career-text" name="text" rows="7" placeholder="Paste resume or LinkedIn text here"></textarea>
+            </label>
+            <button class="primary-button" type="submit">Add Background Material</button>
+          </form>
+          <div id="career-source-list" class="source-list"></div>
+        </article>
+
+        <article id="import-writing-panel" class="panel step-panel setup-step-panel" data-view-section="setup">
+          <div class="step-head">
+            <div class="step-title-wrap">
+              <span class="step-number">3</span>
+              <div>
+                <p class="step-label">Step 3</p>
+                <h2>Teach Us How You Write</h2>
+              </div>
+            </div>
+            <span id="writing-source-count" class="pill"></span>
+          </div>
+          <p class="muted-copy panel-intro">
+            Add a few cover letters, emails, memos, or other writing samples so drafted materials sound more like you.
+          </p>
+          <form id="writing-import-form" class="stack-form">
+            <label>
+              Optional short label
+              <span class="field-help">Example: cover-letter-fintech or memo-ops.</span>
+              <input id="writing-label" name="label" type="text" placeholder="cover-letter-fintech" />
+            </label>
+            <label>
+              Upload a file
+              <span class="field-help">Supported: .txt, .md, .html, .json, .docx</span>
+              <input id="writing-file" name="file" type="file" accept=".txt,.md,.html,.htm,.json,.docx" />
+            </label>
+            <label>
+              Or paste the text directly
+              <span class="field-help">A couple of real examples usually works better than one perfect sample.</span>
+              <textarea id="writing-text" name="text" rows="7" placeholder="Paste a writing sample here"></textarea>
+            </label>
+            <button class="primary-button" type="submit">Add Writing Sample</button>
+          </form>
+          <div id="writing-source-list" class="source-list"></div>
+        </article>
+
+        <article id="build-panel" class="panel step-panel setup-step-panel" data-view-section="setup">
+          <div class="step-head">
+            <div class="step-title-wrap">
+              <span class="step-number">4</span>
+              <div>
+                <p class="step-label">Step 4</p>
+                <h2>Build Your Starter Materials</h2>
+              </div>
+            </div>
+            <span class="pill accent">Review before reuse</span>
+          </div>
+          <p class="muted-copy panel-intro">
+            Generate a master background draft and a writing guide from the material you already added. Nothing gets submitted automatically.
+          </p>
+          <div class="action-row">
+            <button id="build-career-base" class="secondary-button" type="button">Build Background Draft</button>
+            <button id="build-voice-profile" class="secondary-button" type="button">Build Writing Guide</button>
+            <button id="build-onboarding" class="primary-button" type="button">Build Everything</button>
+          </div>
+          <div id="artifact-grid" class="artifact-grid"></div>
+          <details class="advanced-details" open>
+            <summary>Preview generated files</summary>
+            <div class="details-body">
+              <div class="panel-head compact">
+                <h2>Preview</h2>
+                <span id="artifact-preview-pill" class="pill"></span>
+              </div>
+              <pre id="artifact-preview" class="artifact-preview">Choose a generated artifact to preview it here.</pre>
+            </div>
+          </details>
+        </article>
+
+        <article id="search-strategy-panel" class="panel step-panel setup-step-panel" data-view-section="setup">
+          <div class="step-head">
+            <div class="step-title-wrap">
+              <span class="step-number">5</span>
+              <div>
+                <p class="step-label">Step 5</p>
+                <h2>Choose Your Job Targets</h2>
+              </div>
+            </div>
+            <span class="pill accent">What you want</span>
+          </div>
+          <p class="muted-copy panel-intro">
+            Tell the app what kinds of roles you want, where you are open to working, and what compensation range you are aiming for.
+          </p>
+          <form id="search-strategy-form" class="stack-form">
+            <label>
+              Types of roles you want
+              <span class="field-help">Add 1 to 3 role paths, one per line. Example: Applied AI operations.</span>
+              <textarea id="strategy-lanes" rows="5" placeholder="Applied AI operations&#10;Fintech operating systems"></textarea>
+            </label>
+            <label>
+              Best-fit locations
+              <span class="field-help">Places you would most prefer.</span>
+              <textarea id="strategy-preferred-locations" rows="3" placeholder="One location per line"></textarea>
+            </label>
+            <label>
+              Also open to
+              <span class="field-help">Locations or geographies that are acceptable, even if not ideal.</span>
+              <textarea id="strategy-acceptable-locations" rows="3" placeholder="One location per line"></textarea>
+            </label>
+            <label>
+              Locations or situations to avoid
+              <span class="field-help">For example: relocation required, 100% onsite, or a specific region.</span>
+              <textarea id="strategy-blocked-locations" rows="3" placeholder="One item per line"></textarea>
+            </label>
+            <label>
+              Work setup you prefer
+              <span class="field-help">Examples: remote, hybrid, onsite.</span>
+              <textarea id="strategy-work-modes" rows="3" placeholder="remote&#10;hybrid"></textarea>
+            </label>
+            <div class="input-grid">
+              <label>
+                Ideal base salary (USD)
+                <span class="field-help">Your main target for strong-fit roles.</span>
+                <input id="strategy-target-base" type="number" min="0" step="1000" />
+              </label>
+              <label>
+                Lowest exception you would consider (USD)
+                <span class="field-help">Only for roles with unusually strong upside or fit.</span>
+                <input id="strategy-exception-floor" type="number" min="0" step="1000" />
+              </label>
+            </div>
+            <label>
+              If your top targets are too narrow, what should relax first?
+              <span class="field-help">One rule per line. Example: expand geography before lowering compensation floor.</span>
+              <textarea id="strategy-step-down" rows="4" placeholder="One rule per line"></textarea>
+            </label>
+            <button class="primary-button" type="submit">Save Job Targets</button>
+          </form>
+        </article>
+
+        <article id="application-profile-panel" class="panel step-panel setup-step-panel" data-view-section="setup">
+          <div class="step-head">
+            <div class="step-title-wrap">
+              <span class="step-number">6</span>
+              <div>
+                <p class="step-label">Step 6</p>
+                <h2>Save Reusable Application Details</h2>
+              </div>
+            </div>
+            <span class="pill accent">You stay in control</span>
+          </div>
+          <p class="muted-copy panel-intro">
+            Save answers that are safe to reuse, and clearly mark anything sensitive that you always want to confirm yourself.
+          </p>
+          <form id="application-profile-form" class="stack-form">
+            <div class="input-grid">
+              <label>
+                Email
+                <input id="profile-email" type="email" placeholder="name@example.com" />
+              </label>
+              <label>
+                Phone
+                <input id="profile-phone" type="text" placeholder="555-0100" />
+              </label>
+            </div>
+            <div class="input-grid">
+              <label>
+                LinkedIn URL
+                <input id="profile-linkedin" type="url" placeholder="https://linkedin.com/in/..." />
+              </label>
+              <label>
+                Portfolio or personal site
+                <input id="profile-portfolio" type="url" placeholder="https://..." />
+              </label>
+            </div>
+            <label>
+              Answers we can reuse
+              <span class="field-help">Use one key:value pair per line. Example: relocation: Open to relocation for exceptional roles</span>
+              <textarea id="profile-safe-answers" rows="8" placeholder="relocation: Open to relocation for exceptional roles&#10;start_date: Happy to discuss timing"></textarea>
+            </label>
+            <label>
+              Answers you must confirm yourself
+              <span class="field-help">Examples: work authorization, sponsorship, compensation expectation, EEO questions.</span>
+              <textarea id="profile-human-gates" rows="6" placeholder="work authorization&#10;sponsorship&#10;compensation expectation"></textarea>
+            </label>
+            <button class="primary-button" type="submit">Save Reusable Details</button>
+          </form>
+        </article>
+
+        <article id="sourcing-panel" class="panel step-panel" data-view-section="jobs">
+          <div class="step-head">
+            <div class="step-title-wrap">
+              <span class="step-number">7</span>
+              <div>
+                <p class="step-label">Step 7</p>
+                <h2>Find Jobs To Review</h2>
+              </div>
+            </div>
+            <span class="pill accent">Assistant-powered</span>
+          </div>
+          <p class="muted-copy panel-intro">
+            Run a sourcing pass with your assistant, then approve the strongest roles into your real pipeline. You can still enter a job manually if you want to.
+          </p>
+          <div class="action-row">
+            <button id="queue-sourcing-run" class="primary-button" type="button">Run Search With My Assistant</button>
+            <button id="refresh-sourcing" class="secondary-button" type="button">Refresh Search Results</button>
+          </div>
+          <p id="sourcing-helper-copy" class="muted-copy"></p>
+
+          <div class="jobs-overview-grid">
+            <article class="panel inset-panel">
+              <div class="panel-head compact">
+                <h2>Search Queue</h2>
+                <span id="sourcing-count" class="pill"></span>
+              </div>
+              <div id="sourcing-summary-list" class="stat-list"></div>
+            </article>
+
+            <article class="panel inset-panel">
+              <div class="panel-head compact">
+                <h2>Latest Search Package</h2>
+                <span id="sourcing-handoff-pill" class="pill"></span>
+              </div>
+              <div id="sourcing-handoff-list" class="checklist"></div>
+            </article>
+
+            <article class="panel inset-panel">
+              <div class="panel-head compact">
+                <h2>How This Works</h2>
+                <span class="pill accent">Local-first</span>
+              </div>
+              <div class="checklist">
+                <div class="checklist-item">
+                  <strong>1. Prepare a focused search with your chosen assistant.</strong>
+                </div>
+                <div class="checklist-item">
+                  <strong>2. Review the strongest roles in the queue or pipeline list.</strong>
+                </div>
+                <div class="checklist-item">
+                  <strong>3. Use the selected role pane to approve, package, or continue to Apply.</strong>
+                </div>
+              </div>
+            </article>
+          </div>
+
+          <div class="jobs-workspace">
+            <aside class="panel inset-panel jobs-sidebar">
+              <div class="panel-head compact">
+                <h2>Jobs Workspace</h2>
+                <span id="jobs-board-pill" class="pill"></span>
+              </div>
+              <div class="jobs-segmented" role="tablist" aria-label="Jobs views">
+                <button id="jobs-filter-review" class="jobs-filter-button active" type="button">To Review</button>
+                <button id="jobs-filter-pipeline" class="jobs-filter-button" type="button">Pipeline</button>
+              </div>
+              <p id="jobs-filter-copy" class="muted-copy"></p>
+              <div id="jobs-board-list" class="jobs-board-list"></div>
+            </aside>
+
+            <section class="panel inset-panel jobs-detail-panel">
+              <div class="panel-head compact">
+                <h2 id="jobs-detail-heading">Selected Role</h2>
+                <span id="jobs-detail-status-pill" class="pill"></span>
+              </div>
+              <p id="jobs-detail-empty" class="empty-state">Run a search or add a job manually to start reviewing roles here.</p>
+
+              <div id="jobs-detail-body" hidden>
+                <p id="jobs-detail-kicker" class="mini-label"></p>
+                <h3 id="jobs-detail-title" class="jobs-detail-title"></h3>
+                <p id="jobs-detail-meta" class="muted-copy"></p>
+                <p id="jobs-detail-summary" class="panel-intro jobs-detail-summary"></p>
+                <div id="jobs-detail-tags" class="chip-list"></div>
+                <div id="jobs-detail-primary-actions" class="action-row"></div>
+                <a id="jobs-detail-link" class="inline-link" href="#" target="_blank" rel="noreferrer" hidden>Open source listing</a>
+
+                <select id="task-opportunity" hidden></select>
+
+                <div class="divider"></div>
+                <div class="grid jobs-detail-grid">
+                  <article class="panel inset-panel">
+                    <div class="panel-head compact">
+                      <h2>Job Snapshot</h2>
+                      <span id="task-type-pill" class="pill"></span>
+                    </div>
+                    <div id="task-summary-list" class="checklist"></div>
+                    <div class="divider"></div>
+                    <div class="panel-head compact">
+                      <h2>Files To Include</h2>
+                    </div>
+                    <div id="task-files-list" class="source-list"></div>
+                  </article>
+
+                  <article class="panel inset-panel">
+                    <div class="panel-head compact">
+                      <h2>Optional Extra Assistant Help</h2>
+                      <button id="copy-task-prompt" class="secondary-button" type="button">Copy Message</button>
+                    </div>
+                    <div id="task-checklist" class="checklist"></div>
+                    <div class="action-row">
+                      <button id="task-evaluate" class="secondary-button" type="button">Review This Job</button>
+                      <button id="task-draft-package" class="secondary-button" type="button">Draft Application Materials</button>
+                      <button id="task-prepare-submission" class="primary-button" type="button">Prepare Submission Help</button>
+                    </div>
+                    <div class="divider"></div>
+                    <div class="panel-head compact">
+                      <h2>Message For Your Assistant</h2>
+                      <span id="task-output-pill" class="pill"></span>
+                    </div>
+                    <textarea id="task-prompt" rows="18" readonly>Choose a pipeline job to preview the message that will go to your assistant.</textarea>
+                  </article>
+                </div>
+
+                <div class="divider"></div>
+                <div class="panel-head compact">
+                  <h2>Assistant Package</h2>
+                  <span id="bridge-pill" class="pill"></span>
+                </div>
+                <p id="bridge-summary" class="muted-copy">Prepare a package so the assistant gets a clean bundle instead of a loose prompt.</p>
+                <div class="action-row">
+                  <button id="queue-task-handoff" class="primary-button" type="button">Prepare Assistant Package</button>
+                  <button id="copy-handoff-path" class="secondary-button" type="button">Copy Package Location</button>
+                  <button id="copy-handoff-notes" class="secondary-button" type="button">Copy Assistant Instructions</button>
+                  <button id="jobs-open-apply" class="ghost-button" type="button">Continue In Apply</button>
+                </div>
+                <div class="grid jobs-detail-grid">
+                  <article class="panel inset-panel">
+                    <div class="panel-head compact">
+                      <h2>Latest Package</h2>
+                      <span id="handoff-status-pill" class="pill"></span>
+                    </div>
+                    <div id="handoff-summary-list" class="checklist"></div>
+                    <div class="divider"></div>
+                    <div class="panel-head compact">
+                      <h2>What To Do With It</h2>
+                    </div>
+                    <div id="handoff-notes-list" class="checklist"></div>
+                  </article>
+                  <article class="panel inset-panel">
+                    <div class="panel-head compact">
+                      <h2>Earlier Packages</h2>
+                      <span id="bridge-queue-pill" class="pill"></span>
+                    </div>
+                    <div id="bridge-queue-list" class="source-list"></div>
+                  </article>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <details class="advanced-details">
+            <summary>Import assistant or search results manually</summary>
+            <div class="details-body">
+              <p class="muted-copy">
+                This is the fallback path for chat-only assistants or imported search reports. The app accepts markdown, YAML, plain text, or HTML.
+              </p>
+              <form id="sourcing-import-form" class="stack-form">
+                <label>
+                  Optional short label
+                  <span class="field-help">Example: claude-chat-sourcing-run or greenhouse-scan.</span>
+                  <input id="sourcing-label" name="label" type="text" placeholder="assistant-sourcing-run" />
+                </label>
+                <label>
+                  Optional source URL
+                  <span class="field-help">Helpful if the report came from one board or one company page.</span>
+                  <input id="sourcing-source-url" name="source_url" type="url" placeholder="https://jobs.example.com" />
+                </label>
+                <label>
+                  Upload a file
+                  <span class="field-help">Supported: .md, .txt, .html, .yml, .yaml, .json</span>
+                  <input id="sourcing-file" name="file" type="file" accept=".md,.txt,.html,.htm,.yml,.yaml,.json" />
+                </label>
+                <label>
+                  Or paste the results directly
+                  <span class="field-help">Paste a markdown search report, structured YAML, or copied page content.</span>
+                  <textarea id="sourcing-text" name="text" rows="8" placeholder="Paste search results, assistant output, or a sourcing report here"></textarea>
+                </label>
+                <button class="secondary-button" type="submit">Import Search Results</button>
+              </form>
+            </div>
+          </details>
+
+          <details class="advanced-details">
+            <summary>Need to enter one job manually?</summary>
+            <div class="details-body">
+              <form id="opportunity-form" class="stack-form">
+                <div class="input-grid">
+                  <label>
+                    Company
+                    <input id="opportunity-company" type="text" placeholder="Beacon AI" />
+                  </label>
+                  <label>
+                    Job title
+                    <input id="opportunity-role" type="text" placeholder="Strategic Operations Lead" />
+                  </label>
+                </div>
+                <div class="input-grid">
+                  <label>
+                    Direct apply link
+                    <span class="field-help">Add the live application URL if you already have it.</span>
+                    <input id="opportunity-apply-url" type="url" placeholder="https://jobs.example.com/apply/..." />
+                  </label>
+                  <label>
+                    Location
+                    <span class="field-help">Example: Remote (US) or New York, NY.</span>
+                    <input id="opportunity-location" type="text" placeholder="Remote (US)" />
+                  </label>
+                </div>
+                <div class="input-grid">
+                  <label>
+                    Compensation notes
+                    <span class="field-help">Optional. Example: $180K-$210K base + equity.</span>
+                    <input id="opportunity-compensation" type="text" placeholder="$180K-$210K base + equity" />
+                  </label>
+                  <label>
+                    Source site
+                    <span class="field-help">Optional. Example: greenhouse, ashby, or company site.</span>
+                    <input id="opportunity-source-site" type="text" placeholder="greenhouse" />
+                  </label>
+                </div>
+                <div class="input-grid">
+                  <label>
+                    Where are you in the process?
+                    <select id="opportunity-phase"></select>
+                  </label>
+                  <label>
+                    Best-fit target path
+                    <span class="field-help">The role group this job most closely fits.</span>
+                    <select id="opportunity-lane"></select>
+                  </label>
+                </div>
+                <div class="input-grid">
+                  <label>
+                    Company stage
+                    <select id="opportunity-company-stage"></select>
+                  </label>
+                  <label>
+                    Work setup
+                    <select id="opportunity-work-mode"></select>
+                  </label>
+                </div>
+                <label class="checkbox-row">
+                  <input id="opportunity-human-gate" type="checkbox" />
+                  Require a manual checkpoint before anything submission-related happens for this role
+                </label>
+                <label>
+                  What should happen next?
+                  <span class="field-help">Examples: review fit, draft tailored resume, or prep submission answers.</span>
+                  <textarea id="opportunity-next-step" rows="3" placeholder="What should happen next for this role?"></textarea>
+                </label>
+                <details class="advanced-details">
+                  <summary>Optional advanced fit scoring</summary>
+                  <div class="details-body">
+                    <p class="muted-copy">
+                      These inputs help prioritize jobs, but a new user can ignore them if they want a simpler setup.
+                    </p>
+                    <div class="input-grid score-grid">
+                      <label>
+                        Skill fit
+                        <input id="score-capability-fit" type="number" min="0" max="10" step="1" value="7" />
+                      </label>
+                      <label>
+                        Interview odds
+                        <input id="score-screen-odds" type="number" min="0" max="10" step="1" value="7" />
+                      </label>
+                      <label>
+                        Career upside
+                        <input id="score-upside" type="number" min="0" max="10" step="1" value="7" />
+                      </label>
+                      <label>
+                        Compensation fit
+                        <input id="score-compensation" type="number" min="0" max="10" step="1" value="7" />
+                      </label>
+                      <label>
+                        Logistics fit
+                        <input id="score-logistics" type="number" min="0" max="10" step="1" value="7" />
+                      </label>
+                    </div>
+                  </div>
+                </details>
+                <button class="secondary-button" type="submit">Add Job Manually</button>
+              </form>
+            </div>
+          </details>
+        </article>
+
+        <article id="application-run-panel" class="panel step-panel" data-view-section="apply">
+          <div class="step-head">
+            <div class="step-title-wrap">
+              <span class="step-number">8</span>
+              <div>
+                <p class="step-label">Final Step</p>
+                <h2>Finish The Application</h2>
+              </div>
+            </div>
+            <span id="application-run-pill" class="pill accent"></span>
+          </div>
+          <p class="muted-copy panel-intro">
+            Choose the job you are ready to finish, attach the final files, let your assistant help with browser-fill, and stop for final human review before you submit.
+          </p>
+          <div class="task-toolbar">
+            <label>
+              Which job are you finishing?
+              <select id="application-opportunity"></select>
+            </label>
+            <label>
+              Direct apply link
+              <span class="field-help">If the job already includes an apply link, it will appear here automatically.</span>
+              <input id="application-apply-url" type="url" placeholder="https://jobs.example.com/apply/..." />
+            </label>
+            <div class="action-row">
+              <button id="start-application-run" class="primary-button" type="button">Start Application Prep</button>
+            </div>
+          </div>
+          <p id="application-helper-copy" class="muted-copy"></p>
+
+          <article class="panel inset-panel">
+            <div class="panel-head compact">
+              <h2>Recommended Next Step</h2>
+              <span id="application-guidance-pill" class="pill"></span>
+            </div>
+            <p id="application-guidance-summary" class="muted-copy"></p>
+            <div id="application-guidance-list" class="checklist"></div>
+            <div class="action-row">
+              <button id="application-primary-action" class="primary-button" type="button">Start Application Prep</button>
+            </div>
+            <p id="application-guidance-footnote" class="muted-copy"></p>
+          </article>
+
+          <div class="grid">
+            <article class="panel inset-panel">
+              <div class="panel-head compact">
+                <h2>Application Prep</h2>
+                <span id="application-status-pill" class="pill"></span>
+              </div>
+              <div id="application-run-summary-list" class="checklist"></div>
+              <div class="divider"></div>
+              <div class="panel-head compact">
+                <h2>Safe Fields We Can Reuse</h2>
+                <span id="application-safe-pill" class="pill"></span>
+              </div>
+              <div id="application-safe-list" class="checklist"></div>
+              <div class="divider"></div>
+              <div class="panel-head compact">
+                <h2>Questions You Must Confirm Yourself</h2>
+                <span id="application-manual-pill" class="pill danger"></span>
+              </div>
+              <div id="application-manual-list" class="checklist"></div>
+              <div class="divider"></div>
+              <div class="panel-head compact">
+                <h2>Current Review Snapshot</h2>
+                <span id="application-review-pill" class="pill"></span>
+              </div>
+              <p id="application-review-summary" class="muted-copy"></p>
+              <div id="application-review-metrics" class="review-metric-grid"></div>
+              <div class="divider"></div>
+              <div class="panel-head compact">
+                <h2>Already Filled For You</h2>
+                <span id="application-review-autofilled-pill" class="pill"></span>
+              </div>
+              <div id="application-review-autofilled" class="checklist"></div>
+              <div class="divider"></div>
+              <div class="panel-head compact">
+                <h2>Still Needs Your Review</h2>
+                <span id="application-review-manual-pill" class="pill warning"></span>
+              </div>
+              <div id="application-review-manual" class="checklist"></div>
+              <div class="divider"></div>
+              <div class="panel-head compact">
+                <h2>Still Blocking Submission</h2>
+                <span id="application-review-blockers-pill" class="pill warning"></span>
+              </div>
+              <div id="application-review-blockers" class="checklist"></div>
+              <div class="action-row">
+                <button id="preview-browser-assist-log" class="ghost-button" type="button">Preview Browser Assist Log</button>
+              </div>
+            </article>
+
+            <article class="panel inset-panel">
+              <div class="panel-head compact">
+                <h2>Final Files</h2>
+                <span id="application-files-pill" class="pill"></span>
+              </div>
+              <div id="application-files-list" class="source-list"></div>
+              <div class="divider"></div>
+              <form id="application-resume-form" class="stack-form">
+                <label>
+                  Upload your final resume
+                  <span class="field-help">This is the version you want used in the live application.</span>
+                  <input id="application-resume-file" type="file" accept=".pdf,.doc,.docx,.txt,.md" />
+                </label>
+                <button class="secondary-button" type="submit">Attach Final Resume</button>
+              </form>
+              <div class="divider"></div>
+              <form id="application-cover-letter-form" class="stack-form">
+                <label>
+                  Optional cover letter
+                  <span class="field-help">Attach it now if this role needs one.</span>
+                  <input id="application-cover-letter-file" type="file" accept=".pdf,.doc,.docx,.txt,.md" />
+                </label>
+                <button class="secondary-button" type="submit">Attach Cover Letter</button>
+              </form>
+              <div class="divider"></div>
+              <div class="panel-head compact">
+                <h2>Local Browser Assist</h2>
+                <span id="browser-assist-pill" class="pill"></span>
+              </div>
+              <p id="browser-assist-summary" class="muted-copy"></p>
+              <div id="browser-assist-list" class="checklist"></div>
+              <div class="divider"></div>
+              <div class="panel-head compact">
+                <h2>Assistant Fill Help</h2>
+                <span id="application-handoff-pill" class="pill"></span>
+              </div>
+              <div id="application-handoff-list" class="checklist"></div>
+              <details class="advanced-details">
+                <summary>Other Ways To Continue</summary>
+                <div class="details-body">
+                  <p class="muted-copy">
+                    Use one of these if the recommended next step above is not the right path for this role.
+                  </p>
+                  <div class="action-row">
+                    <button id="launch-browser-assist" class="secondary-button" type="button">Use Local Browser Assist</button>
+                    <button id="queue-application-run" class="secondary-button" type="button">Use Assistant Fill Help</button>
+                    <button id="ready-for-final-review" class="secondary-button" type="button">Ready For Final Review</button>
+                    <button id="mark-application-submitted" class="ghost-button" type="button">Mark Submitted</button>
+                  </div>
+                </div>
+              </details>
+            </article>
+          </div>
+        </article>
+      </section>
+
+      <details id="workspace-details-panel" class="support-panel" data-view-section="workspace" open>
+        <summary>Workspace insights and recent activity</summary>
+        <div class="details-body">
+          <section class="grid">
+            <article class="panel">
+              <div class="panel-head">
+                <h2>Onboarding Status</h2>
+                <span id="onboarding-count" class="pill"></span>
+              </div>
+              <div id="onboarding-grid" class="module-grid"></div>
+            </article>
+
+            <article class="panel">
+              <div class="panel-head">
+                <h2>Pipeline Summary</h2>
+                <span id="pipeline-total" class="pill"></span>
+              </div>
+              <div id="phase-list" class="stat-list"></div>
+            </article>
+          </section>
+
+          <section class="grid">
+            <article class="panel">
+              <div class="panel-head">
+                <h2>Top Jobs</h2>
+                <span class="pill accent">Prioritized</span>
+              </div>
+              <div id="opportunity-list" class="opportunity-list"></div>
+            </article>
+
+            <article class="panel">
+              <div class="panel-head">
+                <h2>Sensitive Answers</h2>
+                <span id="human-gate-count" class="pill danger"></span>
+              </div>
+              <div id="human-gate-list" class="gate-list"></div>
+              <div class="divider"></div>
+              <div class="panel-head compact">
+                <h2>Feedback Signals</h2>
+                <span id="feedback-count" class="pill"></span>
+              </div>
+              <div id="feedback-list" class="stat-list"></div>
+            </article>
+          </section>
+
+          <section class="grid">
+            <article class="panel span-2">
+              <div class="panel-head">
+                <h2>Recent Activity</h2>
+                <span class="pill">Recent</span>
+              </div>
+              <div id="activity-log" class="activity-log"></div>
+            </article>
+          </section>
+        </div>
+      </details>
+
+      <footer class="legal-footer">
+        <div class="legal-copy">
+          <strong id="legal-license">AGPL-3.0-only</strong>
+          <span id="legal-source-message">Loading source notice...</span>
+          <small id="legal-warranty">Provided without warranty.</small>
+        </div>
+        <div class="legal-links">
+          <a id="legal-source-link" href="/README.md" target="_blank" rel="noreferrer">Source Info</a>
+          <a href="/LICENSE" target="_blank" rel="noreferrer">License</a>
+          <a href="/NOTICE" target="_blank" rel="noreferrer">Notice</a>
+          <a href="/TRADEMARKS.md" target="_blank" rel="noreferrer">Trademarks</a>
+        </div>
+      </footer>
+    </main>
+
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

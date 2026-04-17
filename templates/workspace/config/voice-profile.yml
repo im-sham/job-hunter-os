@@ -1,0 +1,15 @@
+version: 1
+
+sample_sources: []
+
+voice_traits: []
+
+defaults:
+  formality: warm-professional
+  assertiveness: medium
+  anecdote_density: light
+
+status:
+  calibrated: false
+  reviewer_notes: Add 2-5 writing samples before relying on this profile.
+

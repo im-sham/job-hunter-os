@@ -1,0 +1,8 @@
+version: 1
+
+review_policy:
+  require_human_review: true
+  minimum_signal_count: 5
+
+events: []
+

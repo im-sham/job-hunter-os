@@ -1,0 +1,52 @@
+name: Desktop Release
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-macos:
+    runs-on: macos-14
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build desktop artifacts
+        run: npm run desktop:release
+
+      - name: Upload desktop artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: job-hunter-os-desktop-${{ github.ref_name || 'manual' }}
+          path: |
+            dist/desktop/*.dmg
+            dist/desktop/*-mac.zip
+            dist/desktop/handoff/*
+
+      - name: Create GitHub release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/desktop/*.dmg
+            dist/desktop/*-mac.zip
+            dist/desktop/handoff/*
+          body: |
+            Public alpha desktop build for Job Hunter OS.
+
+            Notes:
+            - Recommended installer: the macOS DMG
+            - Fallback installer: the macOS zip
+            - Current builds are unsigned and not notarized, so macOS may ask users to open manually the first time

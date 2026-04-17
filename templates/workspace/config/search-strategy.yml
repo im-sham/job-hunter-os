@@ -1,0 +1,39 @@
+version: 1
+
+lanes:
+  - name: Primary lane
+    slug: primary-lane
+
+company_stage_mix:
+  large-platform: 0.3
+  scale-up: 0.4
+  early-stage: 0.3
+
+geography:
+  preferred: []
+  acceptable: []
+  blocked: []
+
+work_mode_preferences:
+  - remote
+  - hybrid
+
+compensation:
+  target_base_usd: 0
+  exception_floor_usd: 0
+
+step_down_logic:
+  - Fill in the cases where you would accept a lower-title or lower-comp role.
+
+scoring_weights:
+  capability_fit: 35
+  screen_odds: 30
+  upside: 20
+  compensation: 10
+  logistics: 5
+
+thresholds:
+  pursue_now: 80
+  selective_pursue: 68
+  hold: 55
+

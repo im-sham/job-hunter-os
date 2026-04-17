@@ -1,0 +1,21 @@
+version: 1
+
+sample_sources:
+  - writing/cover-letter-fintech.md
+  - writing/ops-memo.md
+
+voice_traits:
+  - concrete
+  - warm
+  - strategic
+  - low-fluff
+
+defaults:
+  formality: warm-professional
+  assertiveness: medium-high
+  anecdote_density: light
+
+status:
+  calibrated: true
+  reviewer_notes: Keep openings direct, prefer evidence over slogans, and avoid over-claiming.
+

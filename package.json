@@ -1,0 +1,63 @@
+{
+  "name": "job-hunter-os",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "apps/desktop/main.mjs",
+  "license": "AGPL-3.0-only",
+  "productName": "Job Hunter OS",
+  "author": "Shamim Rehman (USMI Labs)",
+  "description": "Open-source extraction scaffold for Job Hunter OS, a local-first career operations system.",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "demo:init": "node packages/core/src/cli.mjs init --workspace demo/workspace --demo --force",
+    "demo:build-onboarding": "node packages/core/src/cli.mjs build-onboarding --workspace demo/workspace",
+    "demo:summary": "node packages/core/src/cli.mjs summary --workspace demo/workspace",
+    "demo:doctor": "node packages/core/src/cli.mjs doctor --workspace demo/workspace",
+    "dashboard": "node apps/dashboard/server.mjs --workspace demo/workspace",
+    "desktop:dev": "electron .",
+    "desktop:package": "electron-builder --mac dmg zip dir --publish never",
+    "desktop:handoff": "node scripts/package-desktop-handoff.mjs",
+    "desktop:release": "npm run desktop:package && npm run desktop:handoff",
+    "tester:start": "node scripts/start-dashboard.mjs --workspace workspace --open",
+    "tester:reset-workspace": "node scripts/bootstrap-workspace.mjs --workspace workspace --force",
+    "tester:package": "node scripts/package-tester.mjs"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.1",
+    "mammoth": "^1.12.0",
+    "playwright-core": "^1.59.1"
+  },
+  "devDependencies": {
+    "electron": "^37.2.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.usmilabs.jobhunteros",
+    "productName": "Job Hunter OS",
+    "asar": true,
+    "directories": {
+      "output": "dist/desktop"
+    },
+    "files": [
+      "apps/**/*",
+      "packages/**/*",
+      "templates/**/*",
+      "LICENSE",
+      "NOTICE",
+      "TRADEMARKS.md",
+      "CONTRIBUTING.md",
+      "README.md",
+      "package.json",
+      "package-lock.json"
+    ],
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": [
+        "dmg",
+        "zip",
+        "dir"
+      ]
+    }
+  }
+}
