@@ -26,6 +26,7 @@ const ASSISTANTS = {
     steps: {
       chat_upload: [
         'Generate the task in Job Hunter OS, then click Prepare Handoff.',
+        'Open a fresh chat in ChatGPT Desktop for this task.',
         'Open the bundle folder and drag the prepared files into ChatGPT Desktop.',
         'Paste the prompt from prompt.txt or use the copied launch notes.',
         'Review the draft and manually confirm all human-gated answers before using anything.',
@@ -46,6 +47,7 @@ const ASSISTANTS = {
     steps: {
       chat_upload: [
         'Generate the task in Job Hunter OS, then click Prepare Handoff.',
+        'Open a fresh chat in Claude Desktop for this task.',
         'Open the handoff folder and upload the prepared files into Claude Desktop chat.',
         'Paste the prompt into the same conversation so Claude follows the product rules.',
         'Review every output manually and keep all sensitive answers human-confirmed.',

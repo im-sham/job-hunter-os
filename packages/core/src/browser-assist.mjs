@@ -102,6 +102,10 @@ const SAFE_FIELD_ALIASES = [
     patterns: ['location city', 'current city', 'city'],
   },
   {
+    keys: ['current_city', 'city', 'location_city'],
+    patterns: ['current location', 'location'],
+  },
+  {
     keys: ['current_country', 'country', 'country_region'],
     patterns: ['country/region', 'country region', 'current country', 'country'],
   },
@@ -240,6 +244,8 @@ const PORTAL_PROFILES = {
     maxAutomationSteps: 3,
     maxOpenApplyClicks: 2,
     openApplyPatterns: [
+      /^application$/i,
+      /autofill application/i,
       /apply now/i,
       /apply for this job/i,
       /easy apply/i,
@@ -699,22 +705,37 @@ function findSafeFieldValue(run, field) {
   return null;
 }
 
+function normalizeUploadLabel(value = '') {
+  return normalizeLabel(value)
+    .replace(/\bchoose file\b/g, ' ')
+    .replace(/\bdrag and drop here\b/g, ' ')
+    .replace(/\bimport resume from\b/g, ' ')
+    .replace(/\bclear\b/g, ' ')
+    .replace(/\boptional\b/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 function pickUpload(run, field, uploadsUsed = new Set(), portalProfile = PORTAL_PROFILES.generic) {
-  const normalized = normalizeLabel([field.label, field.name, field.id].filter(Boolean).join(' '));
+  const normalized = normalizeUploadLabel([field.label, field.name, field.id].filter(Boolean).join(' '));
+  if (/photo|picture|avatar|image/.test(normalized)) {
+    return null;
+  }
   const genericUploadSignal = normalized.includes('upload')
     || normalized.includes('attach')
     || normalized.includes('drop file')
     || normalized.includes('drop files')
-    || normalized.includes('browse');
+    || normalized.includes('browse')
+    || normalized.includes('choose file');
   const candidates = [
     {
       kind: 'cover_letter',
-      patterns: ['cover letter', 'coverletter', 'motivation letter'],
+      patterns: ['cover letter', 'coverletter', 'motivation letter', 'cover note'],
       relativePath: run.artifacts?.cover_letter || '',
     },
     {
       kind: 'resume',
-      patterns: ['resume', 'cv', 'curriculum vitae', 'upload resume', 'candidate resume'],
+      patterns: ['resume', 'resume cv', 'resume/cv', 'cv', 'curriculum vitae', 'upload resume', 'candidate resume'],
       relativePath: run.artifacts?.resume || '',
     },
   ];
@@ -766,6 +787,7 @@ function pickUpload(run, field, uploadsUsed = new Set(), portalProfile = PORTAL_
 }
 
 async function maybeOpenApplyFlow(page, portalProfile = PORTAL_PROFILES.generic) {
+  await maybeAcceptCookieBanner(page);
   const patterns = portalPatterns(portalProfile, 'openApplyPatterns');
 
   for (const pattern of patterns) {
@@ -773,6 +795,7 @@ async function maybeOpenApplyFlow(page, portalProfile = PORTAL_PROFILES.generic)
     if (await button.count()) {
       await button.click();
       await page.waitForLoadState('networkidle').catch(() => {});
+      await maybeAcceptCookieBanner(page);
       return true;
     }
 
@@ -780,6 +803,7 @@ async function maybeOpenApplyFlow(page, portalProfile = PORTAL_PROFILES.generic)
     if (await link.count()) {
       await link.click();
       await page.waitForLoadState('networkidle').catch(() => {});
+      await maybeAcceptCookieBanner(page);
       return true;
     }
   }
@@ -787,8 +811,28 @@ async function maybeOpenApplyFlow(page, portalProfile = PORTAL_PROFILES.generic)
   return false;
 }
 
-async function scanForm(page) {
-  return page.evaluate(() => {
+async function maybeAcceptCookieBanner(page) {
+  const patterns = [
+    /accept all/i,
+    /^accept$/i,
+    /allow all/i,
+    /agree/i,
+  ];
+
+  for (const pattern of patterns) {
+    const button = page.getByRole('button', { name: pattern }).first();
+    if (await button.count()) {
+      await button.click({ timeout: 3000 }).catch(() => {});
+      await page.waitForTimeout(400);
+      return true;
+    }
+  }
+
+  return false;
+}
+
+async function scanSingleFrame(frame, frameIndex) {
+  return frame.evaluate(({ refPrefix, frameIndexValue }) => {
     const isVisible = element => {
       if (!element) return false;
       const style = window.getComputedStyle(element);
@@ -798,6 +842,31 @@ async function scanForm(page) {
     };
 
     const textContent = element => (element?.textContent || '').replace(/\s+/g, ' ').trim();
+    const cleanContext = value => (value || '')
+      .replace(/\s+/g, ' ')
+      .replace(/Choose file or drag and drop here/gi, ' ')
+      .replace(/Import resume from/gi, ' ')
+      .replace(/Clear/gi, ' ')
+      .replace(/\+\s*Add/gi, ' ')
+      .trim();
+    const nearbyContext = element => {
+      const candidates = [
+        element.closest('label'),
+        element.closest('fieldset'),
+        element.closest('[role="group"]'),
+        element.parentElement,
+        element.parentElement?.parentElement,
+      ].filter(Boolean);
+
+      for (const candidate of candidates) {
+        const text = cleanContext(textContent(candidate));
+        if (!text) continue;
+        if (text.length > 180) continue;
+        return text;
+      }
+
+      return '';
+    };
 
     const labelFor = element => {
       if (!element) return '';
@@ -815,10 +884,11 @@ async function scanForm(page) {
         const node = document.getElementById(labelledBy);
         if (node) return textContent(node);
       }
+      const context = nearbyContext(element);
+      if (context) return context;
       return '';
     };
 
-    const refPrefix = 'job-hunter-os-browser-assist';
     let refIndex = 0;
     const fields = [];
     for (const element of document.querySelectorAll('input, textarea, select')) {
@@ -830,10 +900,11 @@ async function scanForm(page) {
       if (!label && type !== 'file') continue;
       if (type !== 'file' && !isVisible(element)) continue;
       refIndex += 1;
-      const ref = `${refPrefix}-${refIndex}`;
+      const ref = `${refPrefix}-${frameIndexValue}-${refIndex}`;
       element.setAttribute('data-jhos-ref', ref);
       fields.push({
         ref,
+        frame_index: frameIndexValue,
         tag,
         type,
         label,
@@ -844,21 +915,65 @@ async function scanForm(page) {
       });
     }
 
-    const buttonTexts = [];
+    const buttons = [];
     for (const element of document.querySelectorAll('button, input[type="submit"], input[type="button"], a[role="button"]')) {
       const text = textContent(element) || element.getAttribute('value') || element.getAttribute('aria-label') || '';
       if (!text || !isVisible(element)) continue;
-      buttonTexts.push(text);
+      buttons.push(text);
     }
 
     return {
+      frame_index: frameIndexValue,
       url: window.location.href,
       title: document.title,
       fields,
-      buttonTexts,
+      buttonTexts: buttons,
       bodyText: (document.body?.innerText || '').slice(0, 20000),
+      iframeCount: document.querySelectorAll('iframe').length,
     };
+  }, {
+    refPrefix: 'job-hunter-os-browser-assist',
+    frameIndexValue: frameIndex,
   });
+}
+
+async function scanForm(page) {
+  const frames = page.frames();
+  const scans = [];
+
+  for (let index = 0; index < frames.length; index += 1) {
+    const frame = frames[index];
+    try {
+      const scan = await scanSingleFrame(frame, index);
+      scans.push(scan);
+    } catch {
+      // Ignore inaccessible cross-origin frames and continue scanning what we can reach.
+    }
+  }
+
+  const buttonTexts = [...new Set(scans.flatMap(scan => scan.buttonTexts || []))];
+  const bodyText = scans
+    .map(scan => scan.bodyText || '')
+    .filter(Boolean)
+    .join('\n\n');
+  const fields = scans.flatMap(scan => scan.fields || []);
+  const mainScan = scans.find(scan => scan.frame_index === 0) || scans[0] || {};
+
+  return {
+    url: page.url(),
+    title: await page.title(),
+    fields,
+    buttonTexts,
+    bodyText,
+    iframeCount: Number(mainScan.iframeCount || 0),
+    frames: scans.map(scan => ({
+      frame_index: scan.frame_index,
+      url: scan.url,
+      title: scan.title,
+      field_count: (scan.fields || []).length,
+      button_count: (scan.buttonTexts || []).length,
+    })),
+  };
 }
 
 function looksLikeApplicationForm(scan = {}) {
@@ -912,7 +1027,10 @@ function detectPageGate(bodyText = '', portalProfile = PORTAL_PROFILES.generic) 
 }
 
 async function fillFieldValue(page, field, value) {
-  const locator = page.locator(`[data-jhos-ref="${field.ref}"]`).first();
+  const locator = page.frames()[Number(field.frame_index || 0)]?.locator(`[data-jhos-ref="${field.ref}"]`).first();
+  if (!locator) {
+    throw new Error(`Could not find a browser-assist frame for field ${field.ref}.`);
+  }
   if (field.tag === 'select') {
     try {
       await locator.selectOption({ label: value });
@@ -927,7 +1045,10 @@ async function fillFieldValue(page, field, value) {
 }
 
 async function uploadFieldValue(page, field, filePath) {
-  const locator = page.locator(`[data-jhos-ref="${field.ref}"]`).first();
+  const locator = page.frames()[Number(field.frame_index || 0)]?.locator(`[data-jhos-ref="${field.ref}"]`).first();
+  if (!locator) {
+    throw new Error(`Could not find a browser-assist frame for upload ${field.ref}.`);
+  }
   await locator.setInputFiles(filePath);
 }
 
@@ -961,6 +1082,42 @@ function actionLogEntry(kind, details = {}) {
     kind,
     ...details,
   };
+}
+
+function dedupeAutoFilled(items = []) {
+  const seen = new Set();
+  return items.filter(item => {
+    const key = [
+      item.kind || '',
+      item.field || '',
+      item.source || '',
+      item.file || '',
+      item.value_preview || '',
+    ].join('::');
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function dedupeManualItems(items = []) {
+  const seen = new Set();
+  return items.filter(item => {
+    const key = [item.key || '', item.label || '', item.reason || ''].join('::');
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function dedupeStrings(items = []) {
+  const seen = new Set();
+  return items.filter(item => {
+    const value = normalizeString(item);
+    if (!value || seen.has(value)) return false;
+    seen.add(value);
+    return true;
+  });
 }
 
 function logMarkdown(run, session) {
@@ -1049,27 +1206,27 @@ function mapRunStatus(browserSession) {
   if (browserSession.status === 'ready_for_final_review') {
     return {
       status: 'awaiting_final_confirmation',
-      nextStep: 'Browser assist reached the final-review step. Verify everything manually, then submit when ready.',
+      nextStep: browserSession.next_step || 'Browser assist reached the final-review step. Verify everything manually, then submit when ready.',
     };
   }
 
   if (browserSession.status === 'manual_review_required') {
     return {
       status: 'manual_review_required',
-      nextStep: 'Browser assist paused because a manual answer or unresolved required field needs your review in the live application.',
+      nextStep: browserSession.next_step || 'Browser assist paused because a manual answer or unresolved required field needs your review in the live application.',
     };
   }
 
   if (browserSession.status === 'launch_failed') {
     return {
       status: 'browser_assist_error',
-      nextStep: 'Browser assist could not complete. Use assistant fill help or continue manually.',
+      nextStep: browserSession.next_step || 'Browser assist could not complete. Use assistant fill help or continue manually.',
     };
   }
 
   return {
     status: 'browser_assist_in_progress',
-    nextStep: 'Browser assist filled the current step and left the live application ready for your review.',
+    nextStep: browserSession.next_step || 'Browser assist filled the current step and left the live application ready for your review.',
   };
 }
 
@@ -1175,6 +1332,7 @@ export async function runBrowserAssist({
 
     await page.goto(run.portal.apply_url, { waitUntil: 'domcontentloaded' });
     await page.waitForLoadState('networkidle').catch(() => {});
+    await maybeAcceptCookieBanner(page);
     let initialScan = await scanForm(page);
     let portalProfile = detectBrowserAssistPortal(run, initialScan);
 
@@ -1269,10 +1427,10 @@ export async function runBrowserAssist({
             id: portalProfile.id,
             name: portalProfile.name,
           },
-          auto_filled: [...(session.auto_filled || []), ...autoFilled],
-          manual_review_items: [...(session.manual_review_items || []), ...manualItems],
-          unresolved_required_fields: [...(session.unresolved_required_fields || []), ...unresolvedRequired],
-          submit_buttons: submitButtons,
+          auto_filled: dedupeAutoFilled([...(session.auto_filled || []), ...autoFilled]),
+          manual_review_items: dedupeManualItems([...(session.manual_review_items || []), ...manualItems]),
+          unresolved_required_fields: dedupeStrings([...(session.unresolved_required_fields || []), ...unresolvedRequired]),
+          submit_buttons: dedupeStrings(submitButtons),
         };
 
         if (submitButtons.length) {

@@ -64,6 +64,11 @@ function writeYamlFile(filePath, value) {
   }));
 }
 
+function readTextFile(filePath) {
+  if (!fs.existsSync(filePath)) return '';
+  return fs.readFileSync(filePath, 'utf-8');
+}
+
 function slugify(value = '') {
   return String(value || '')
     .toLowerCase()
@@ -138,9 +143,10 @@ function uploadBundleName(relativePath, index) {
   return `${String(index + 1).padStart(2, '0')}-${base}${extension}`;
 }
 
-function handoffLaunchNotes({ adapter, bundleDir, promptFile, uploadDir, taskPackPath }) {
+function handoffLaunchNotes({ adapter, assistantTitle, bundleDir, promptFile, uploadDir, taskPackPath }) {
   if (adapter === 'chat_upload') {
     return [
+      `Open a new chat in ${assistantTitle || 'your chat assistant'}.`,
       `Open the handoff folder at ${bundleDir}.`,
       `Upload the files inside ${uploadDir} to your chat assistant.`,
       `Paste the prompt from ${promptFile} into the same chat before asking for output.`,
@@ -149,7 +155,7 @@ function handoffLaunchNotes({ adapter, bundleDir, promptFile, uploadDir, taskPac
   }
 
   return [
-    `Open your folder-connected agent in the workspace and point it to ${taskPackPath}.`,
+    `Open ${assistantTitle || 'your folder-connected assistant'} in the workspace and point it to ${taskPackPath}.`,
     `Use the handoff notes in ${bundleDir} if you want a clean launch point.`,
     `Have the agent read the referenced workspace files before it drafts or evaluates anything.`,
     'Keep submissions and sensitive field handling human-approved only.',
@@ -221,6 +227,7 @@ function summarizeTaskEntry(workspacePath, entry) {
   const readmeFile = path.join(workspacePath, entry.readme_file);
   const manifestFile = path.join(workspacePath, entry.manifest_file);
   const taskPackCopy = entry.task_pack_copy ? path.join(workspacePath, entry.task_pack_copy) : null;
+  const promptText = readTextFile(promptFile);
 
   return {
     id: entry.id,
@@ -241,6 +248,7 @@ function summarizeTaskEntry(workspacePath, entry) {
     absolute_bundle_dir: bundleDir,
     prompt_file: entry.prompt_file,
     absolute_prompt_file: promptFile,
+    prompt_text: promptText,
     readme_file: entry.readme_file,
     absolute_readme_file: readmeFile,
     manifest_file: entry.manifest_file,
@@ -373,6 +381,7 @@ export function queueAgentTask({ workspaceArg, opportunityId, taskType, adapter,
 
   entry.launch_notes = handoffLaunchNotes({
     adapter: resolvedAdapter,
+    assistantTitle: assistant.title,
     bundleDir: path.join(workspacePath, bundleRelativeDir),
     promptFile: path.join(workspacePath, promptRelativePath),
     uploadDir: uploadMeta.upload_dir,
@@ -502,13 +511,14 @@ export function queueSourcingRun({ workspaceArg, assistantId = DEFAULT_ASSISTANT
 
   entry.launch_notes = resolvedAdapter === 'chat_upload'
     ? [
+      `Open a new chat in ${assistant.title}.`,
       `Open the handoff folder at ${path.join(workspacePath, bundleRelativeDir)}.`,
       `Upload the prepared files inside ${uploadMeta.upload_dir} to your chat assistant.`,
       `Tell the assistant to return a YAML queue matching the included template.`,
       'Paste the returned YAML or markdown search report back into the dashboard import area if the assistant cannot write to the workspace directly.',
     ]
     : [
-      `Open your folder-connected agent in the workspace and point it to ${resolveWorkspaceFile(workspacePath, taskPack.output_task_pack)}.`,
+      `Open ${assistant.title} in the workspace and point it to ${resolveWorkspaceFile(workspacePath, taskPack.output_task_pack)}.`,
       `Have the assistant browse the web and write results into ${taskPack.queue_output_path}.`,
       `Ask it to also write the human-readable note at ${taskPack.review_output_path}.`,
       'Refresh the dashboard after the sourcing run completes to review and approve roles.',
@@ -630,13 +640,14 @@ export function queueApplicationRun({ workspaceArg, runId, assistantId = DEFAULT
 
   entry.launch_notes = resolvedAdapter === 'chat_upload'
     ? [
+      `Open a new chat in ${assistant.title}.`,
       `Open the handoff folder at ${path.join(workspacePath, bundleRelativeDir)}.`,
       `Upload the prepared files inside ${uploadMeta.upload_dir} to your chat assistant.`,
       `Use the prompt in ${path.join(workspacePath, promptRelativePath)} and stop before final submit.`,
       'Return control to the human for all human-gated questions and the final submit step.',
     ]
     : [
-      `Open your folder-connected agent in the workspace and point it to ${resolveWorkspaceFile(workspacePath, taskPack.output_task_pack)}.`,
+      `Open ${assistant.title} in the workspace and point it to ${resolveWorkspaceFile(workspacePath, taskPack.output_task_pack)}.`,
       `Have the assistant open ${taskPack.run.portal.apply_url} and use the packet plus attachments.`,
       'It should stop for human-gated questions and before final submit.',
       'Refresh the dashboard after meaningful progress or when you are ready to mark the run submitted.',

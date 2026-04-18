@@ -17,6 +17,11 @@ import {
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const demoWorkspace = path.resolve(__dirname, '..', 'demo', 'workspace');
+const fixturesRoot = path.resolve(__dirname, 'fixtures', 'browser-assist');
+
+function readFixture(name) {
+  return JSON.parse(fs.readFileSync(path.join(fixturesRoot, name), 'utf-8'));
+}
 
 function tempWorkspace(prefix) {
   const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), prefix));
@@ -241,4 +246,108 @@ test('browser assist keeps opening apply flow for workday chooser screens but st
 
   assert.equal(needsOpenApplyStep(workdayChooser, 'workday'), true);
   assert.equal(needsOpenApplyStep(workdayGate, 'workday'), false);
+});
+
+test('browser assist recognizes live-style Lever apply scans and maps common fields safely', () => {
+  const workspace = tempWorkspace('job-hunter-os-browser-assist-');
+  const started = startApplicationRun({
+    workspaceArg: workspace,
+    opportunityId: 'demo-101',
+    payload: {
+      apply_url: 'https://jobs.lever.co/bonedry/332cc6ee-c299-4a91-b8b7-e535b802c707',
+    },
+  });
+  const fixture = readFixture('lever-apply-scan.json');
+  const resumePath = path.join(path.dirname(workspace), 'resume.pdf');
+  fs.writeFileSync(resumePath, 'resume-bytes');
+  const run = attachApplicationArtifact({
+    workspaceArg: workspace,
+    runId: started.run.id,
+    artifactKind: 'resume',
+    inputPath: resumePath,
+    filename: 'resume.pdf',
+  }).run;
+
+  const portal = detectBrowserAssistPortal(run, fixture);
+  const locationPlan = resolveFieldPlan(run, fixture.fields.find(field => field.label.startsWith('Current location')), portal);
+  const sourcePlan = resolveFieldPlan(run, fixture.fields.find(field => field.label.startsWith('How did you hear')), portal);
+  const authorizationPlan = resolveFieldPlan(run, fixture.fields.find(field => field.label.startsWith('Are you legally authorized')), portal);
+  const eeoPlan = resolveFieldPlan(run, fixture.fields.find(field => field.label === 'Gender'), portal);
+  const uploadPlan = resolveFieldPlan(run, fixture.fields.find(field => field.type === 'file'), portal);
+
+  assert.equal(portal.id, 'lever');
+  assert.equal(needsOpenApplyStep(fixture, portal), false);
+  assert.equal(locationPlan.kind, 'safe');
+  assert.equal(locationPlan.key, 'current_city');
+  assert.equal(sourcePlan.kind, 'safe');
+  assert.equal(sourcePlan.key, 'referral_source');
+  assert.equal(authorizationPlan.kind, 'manual');
+  assert.equal(authorizationPlan.key, 'work_authorization');
+  assert.equal(eeoPlan.kind, 'manual');
+  assert.equal(uploadPlan.kind, 'upload');
+  assert.equal(uploadPlan.artifact, 'resume');
+});
+
+test('browser assist treats SmartRecruiters shell pages as pre-apply steps and one-click scans as real forms', () => {
+  const workspace = tempWorkspace('job-hunter-os-browser-assist-');
+  const started = startApplicationRun({
+    workspaceArg: workspace,
+    opportunityId: 'demo-101',
+    payload: {
+      apply_url: 'https://jobs.smartrecruiters.com/BringleExcellence/105472833-graphic-design-internship',
+    },
+  });
+  const shellFixture = readFixture('smartrecruiters-shell-scan.json');
+  const formFixture = readFixture('smartrecruiters-oneclick-scan.json');
+  const run = started.run;
+
+  const shellPortal = detectBrowserAssistPortal(run, shellFixture);
+  const formPortal = detectBrowserAssistPortal(run, formFixture);
+
+  assert.equal(shellPortal.id, 'smartrecruiters');
+  assert.equal(formPortal.id, 'smartrecruiters');
+  assert.equal(needsOpenApplyStep(shellFixture, shellPortal), true);
+  assert.equal(needsOpenApplyStep(formFixture, formPortal), false);
+});
+
+test('browser assist handles live-style Workable tabbed job pages and avoids using the photo upload for resumes', () => {
+  const workspace = tempWorkspace('job-hunter-os-browser-assist-');
+  const started = startApplicationRun({
+    workspaceArg: workspace,
+    opportunityId: 'demo-101',
+    payload: {
+      apply_url: 'https://apply.workable.com/swot-hospitality-management-company/j/129F8CC85A/',
+    },
+  });
+  const preApplyFixture = readFixture('workable-job-tab-scan.json');
+  const fixture = readFixture('workable-apply-scan.json');
+  const resumePath = path.join(path.dirname(workspace), 'resume.pdf');
+  fs.writeFileSync(resumePath, 'resume-bytes');
+
+  let run = attachApplicationArtifact({
+    workspaceArg: workspace,
+    runId: started.run.id,
+    artifactKind: 'resume',
+    inputPath: resumePath,
+    filename: 'resume.pdf',
+  }).run;
+
+  const preApplyPortal = detectBrowserAssistPortal(run, preApplyFixture);
+  const portal = detectBrowserAssistPortal(run, fixture);
+  const photoPlan = resolveFieldPlan(run, fixture.fields.find(field => field.label === 'Photo'), portal);
+  const firstNamePlan = resolveFieldPlan(run, fixture.fields.find(field => field.label === 'First name'), portal);
+  const resumePlan = resolveFieldPlan(run, fixture.fields.find(field => field.label === 'Resume'), portal);
+  const countryPlan = resolveFieldPlan(run, fixture.fields.find(field => field.label === 'Country'), portal);
+
+  assert.equal(preApplyPortal.id, 'workable');
+  assert.equal(portal.id, 'workable');
+  assert.equal(needsOpenApplyStep(preApplyFixture, preApplyPortal), true);
+  assert.equal(needsOpenApplyStep(fixture, portal), false);
+  assert.equal(photoPlan.kind, 'unknown');
+  assert.equal(firstNamePlan.kind, 'safe');
+  assert.equal(firstNamePlan.key, 'full_name');
+  assert.equal(resumePlan.kind, 'upload');
+  assert.equal(resumePlan.artifact, 'resume');
+  assert.equal(countryPlan.kind, 'safe');
+  assert.equal(countryPlan.key, 'current_country');
 });

@@ -1,0 +1,39 @@
+{
+  "url": "https://jobs.smartrecruiters.com/oneclick-ui/company/BringleExcellence/publication/5530c4c9-e74e-4a59-b76f-b85c895d4b26?dcr_ci=BringleExcellence",
+  "title": "smartrecruiters.com",
+  "buttonTexts": [
+    "Submit application"
+  ],
+  "fields": [
+    {
+      "tag": "input",
+      "type": "file",
+      "label": "Resume/CV",
+      "name": "resume",
+      "id": "resume"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "label": "First name",
+      "name": "firstName",
+      "id": "firstName"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "label": "Last name",
+      "name": "lastName",
+      "id": "lastName"
+    },
+    {
+      "tag": "input",
+      "type": "email",
+      "label": "Email",
+      "name": "email",
+      "id": "email"
+    }
+  ],
+  "iframeCount": 1,
+  "bodyText": "SmartRecruiters one click application Resume/CV First name Last name Email Submit application"
+}

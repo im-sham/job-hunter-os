@@ -41,17 +41,19 @@ If the DMG does not open cleanly on your machine, you can still use the zip:
 3. Open \`Job Hunter OS.app\`.
 ` : '';
 
-  return `# Job Hunter OS Desktop Tester Handoff
+  return `# Job Hunter OS Desktop App
 
-## What To Open
+This is the recommended alpha install path for non-technical testers.
+
+## Install
 
 1. Double-click ${primaryArtifact}.
 2. If you opened the DMG, drag \`Job Hunter OS.app\` into \`Applications\`.
-3. Open \`Job Hunter OS.app\` from Applications or directly from the mounted installer window.
+3. Open \`Job Hunter OS.app\`.
 
 ## Important macOS Note
 
-This build is currently unsigned and not notarized.
+This alpha build is currently unsigned and not notarized.
 
 If macOS blocks the first launch:
 
@@ -61,21 +63,21 @@ If macOS blocks the first launch:
 ## What The App Does
 
 - creates a local workspace in \`~/Documents/Job Hunter OS Workspace\`
-- opens a native app window for the dashboard
+- opens the dashboard in a native app window
 - keeps your workspace files local on your computer
 
 ${fallbackInstall}
 
-## Suggested Test Flow
+## Suggested First Run
 
-1. Import one or more resumes or LinkedIn exports.
-2. Import two or more writing samples.
+1. Choose your assistant.
+2. Import background material and writing samples.
 3. Click \`Build Everything\`.
-4. Fill in Job Targets and Reusable Application Details.
+4. Fill in job targets and reusable application details.
 5. Click \`Run Search With My Assistant\`.
-6. Refresh and approve at least one sourced role into the pipeline.
-7. Generate an agent task for that role.
-8. Prepare a handoff for the assistant you actually use.
+6. Approve at least one role into the pipeline.
+7. Prepare assistant help for that role.
+8. Continue into the application flow and stop at final human review.
 `;
 }
 

@@ -1,0 +1,97 @@
+{
+  "url": "https://apply.workable.com/swot-hospitality-management-company/j/129F8CC85A/apply/",
+  "title": "Καμαριέρα / Public Areas Housekeeper -The Fiction - SWOT Hospitality Management Company - Application",
+  "buttonTexts": [
+    "Overview",
+    "Application",
+    "Import resume from",
+    "Submit application"
+  ],
+  "fields": [
+    {
+      "tag": "input",
+      "type": "text",
+      "label": "First name",
+      "name": "firstname",
+      "id": "firstname"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "label": "Last name",
+      "name": "lastname",
+      "id": "lastname"
+    },
+    {
+      "tag": "input",
+      "type": "email",
+      "label": "Email",
+      "name": "email",
+      "id": "email"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "label": "Headline",
+      "name": "headline",
+      "id": "headline"
+    },
+    {
+      "tag": "input",
+      "type": "tel",
+      "label": "Phone",
+      "name": "phone",
+      "id": ""
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "label": "Address",
+      "name": "address",
+      "id": "address"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "label": "City",
+      "name": "city",
+      "id": "city"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "label": "Postcode",
+      "name": "postcode",
+      "id": "postcode"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "label": "Country",
+      "name": "country",
+      "id": "country"
+    },
+    {
+      "tag": "input",
+      "type": "file",
+      "label": "Photo",
+      "name": "",
+      "id": "input_files_input_photo"
+    },
+    {
+      "tag": "textarea",
+      "type": "textarea",
+      "label": "Summary",
+      "name": "summary",
+      "id": "summary"
+    },
+    {
+      "tag": "input",
+      "type": "file",
+      "label": "Resume",
+      "name": "",
+      "id": "input_files_input_resume"
+    }
+  ],
+  "bodyText": "Καμαριέρα / Public Areas Housekeeper -The Fiction Application Autofill Application Personal information First name Last name Email Headline Phone Address City Postcode Country Photo Summary Resume Submit application"
+}

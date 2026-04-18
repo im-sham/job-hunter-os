@@ -52,34 +52,35 @@ function writeFile(outputRoot, relativePath, contents, mode = 0o644) {
 function createStartHere() {
   return `# Job Hunter OS Tester Bundle
 
-This bundle is set up for a first local product test.
+This bundle is for a guided local alpha test.
 
-## Recommended Start
+## Start Here
 
 1. Double-click \`start.command\`.
-2. Wait for dependencies to install the first time.
+2. Wait for the first dependency install.
 3. The dashboard should open automatically at \`http://localhost:4173\`.
-4. Work from the dashboard only. You should not need to edit YAML files directly.
+4. Stay in the dashboard for the full test. You should not need to edit workspace files directly.
 
-## What To Try
+## What To Try First
 
-1. Import one or more resumes or LinkedIn exports.
-2. Import two or more writing samples.
+1. Choose your assistant.
+2. Import background material and writing samples.
 3. Click \`Build Everything\`.
 4. Fill in \`Choose Your Job Targets\`.
 5. Fill in \`Save Reusable Application Details\`.
 6. Click \`Run Search With My Assistant\`.
-7. Refresh and approve at least one sourced role.
-8. Generate an assistant task for that role.
-9. Click \`Prepare Assistant Package\`.
+7. Approve at least one role into the pipeline.
+8. Click \`Prepare Assistant Package\`.
+9. Continue into the application flow and stop at final human review.
 
-## Notes
+## Important Notes
 
 - Your local workspace lives in the \`workspace/\` folder inside this bundle.
 - Sensitive fields should remain human-reviewed.
-- If you want to wipe the starter workspace and begin again, double-click \`reset-workspace.command\`.
+- If you want to start over, double-click \`reset-workspace.command\`.
+- This bundle requires \`Node.js\` on the machine.
 
-Full tester guidance is available in \`docs/tester-guide.md\`.
+Full guidance is available in \`docs/tester-guide.md\`.
 `;
 }
 

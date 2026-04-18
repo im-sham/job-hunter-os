@@ -437,20 +437,12 @@
 
             <article class="panel inset-panel">
               <div class="panel-head compact">
-                <h2>How This Works</h2>
-                <span class="pill accent">Local-first</span>
+                <h2>If Search Pauses</h2>
+                <span id="sourcing-guidance-pill" class="pill"></span>
               </div>
-              <div class="checklist">
-                <div class="checklist-item">
-                  <strong>1. Prepare a focused search with your chosen assistant.</strong>
-                </div>
-                <div class="checklist-item">
-                  <strong>2. Review the strongest roles in the queue or pipeline list.</strong>
-                </div>
-                <div class="checklist-item">
-                  <strong>3. Use the selected role pane to approve, package, or continue to Apply.</strong>
-                </div>
-              </div>
+              <p id="sourcing-guidance-summary" class="muted-copy"></p>
+              <div id="sourcing-guidance-list" class="checklist"></div>
+              <p id="sourcing-guidance-footnote" class="muted-copy"></p>
             </article>
           </div>
 
@@ -542,9 +534,34 @@
                     <div id="handoff-summary-list" class="checklist"></div>
                     <div class="divider"></div>
                     <div class="panel-head compact">
+                      <h2>Exactly What To Upload</h2>
+                    </div>
+                    <div id="handoff-upload-list" class="checklist"></div>
+                    <div class="divider"></div>
+                    <div class="panel-head compact">
+                      <h2>Message To Paste</h2>
+                      <button id="copy-handoff-message" class="secondary-button" type="button">Copy</button>
+                    </div>
+                    <textarea id="handoff-message" rows="12" readonly></textarea>
+                    <div class="divider"></div>
+                    <div class="panel-head compact">
                       <h2>What To Do With It</h2>
                     </div>
                     <div id="handoff-notes-list" class="checklist"></div>
+                    <div class="divider"></div>
+                    <div class="panel-head compact">
+                      <h2>If You Feel Stuck</h2>
+                      <span id="handoff-guidance-pill" class="pill"></span>
+                    </div>
+                    <p id="handoff-guidance-summary" class="muted-copy"></p>
+                    <div id="handoff-guidance-list" class="checklist"></div>
+                    <div class="divider"></div>
+                    <div class="panel-head compact">
+                      <h2>Recovery Message</h2>
+                      <button id="copy-handoff-recovery" class="secondary-button" type="button">Copy</button>
+                    </div>
+                    <textarea id="handoff-recovery-message" rows="8" readonly></textarea>
+                    <p id="handoff-guidance-footnote" class="muted-copy"></p>
                   </article>
                   <article class="panel inset-panel">
                     <div class="panel-head compact">
@@ -817,6 +834,14 @@
               </div>
               <p id="browser-assist-summary" class="muted-copy"></p>
               <div id="browser-assist-list" class="checklist"></div>
+              <div class="divider"></div>
+              <div class="panel-head compact">
+                <h2>Why The App Paused</h2>
+                <span id="application-pause-pill" class="pill"></span>
+              </div>
+              <p id="application-pause-summary" class="muted-copy"></p>
+              <div id="application-pause-list" class="checklist"></div>
+              <p id="application-pause-footnote" class="muted-copy"></p>
               <div class="divider"></div>
               <div class="panel-head compact">
                 <h2>Assistant Fill Help</h2>

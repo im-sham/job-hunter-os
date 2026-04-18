@@ -1,0 +1,51 @@
+name: ATS compatibility report
+description: Report how browser assist or application prep behaved on a specific applicant tracking system.
+title: "[ATS] "
+labels:
+  - ats
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template when a portal-specific flow worked, partially worked, or failed.
+  - type: input
+    id: ats
+    attributes:
+      label: ATS or application platform
+      placeholder: Greenhouse, Workday, SmartRecruiters, custom company form, etc.
+    validations:
+      required: true
+  - type: input
+    id: company
+    attributes:
+      label: Company or role page
+      placeholder: Optional company name or job link
+  - type: dropdown
+    id: result
+    attributes:
+      label: What happened?
+      options:
+        - Worked well
+        - Mostly worked
+        - Partially worked
+        - Failed
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: What did the app do?
+      placeholder: Browser assist filled safe fields, paused at work authorization, then...
+    validations:
+      required: true
+  - type: textarea
+    id: blockers
+    attributes:
+      label: What still needs work?
+      placeholder: The resume upload was correct, but the portal-specific salary field was missed...
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Optional evidence
+      description: Screenshots, field labels, or copied portal wording are helpful.
+

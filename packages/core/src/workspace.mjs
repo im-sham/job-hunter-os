@@ -349,7 +349,8 @@ function summarizeReviewReadiness(run, session) {
     return {
       label: 'Needs Your Review',
       tone: 'warning',
-      summary: `${manual.length} manual item${manual.length === 1 ? '' : 's'} and ${unresolved.length} remaining blocker${unresolved.length === 1 ? '' : 's'} still need a human.`,
+      summary: session?.next_step
+        || `${manual.length} manual item${manual.length === 1 ? '' : 's'} and ${unresolved.length} remaining blocker${unresolved.length === 1 ? '' : 's'} still need a human.`,
     };
   }
 
@@ -357,7 +358,7 @@ function summarizeReviewReadiness(run, session) {
     return {
       label: 'Alternate Path Recommended',
       tone: 'danger',
-      summary: 'Browser assist hit an issue, so assistant fill help or a manual pass is safer now.',
+      summary: session?.next_step || 'Browser assist hit an issue, so assistant fill help or a manual pass is safer now.',
     };
   }
 
@@ -381,7 +382,7 @@ function summarizeReviewReadiness(run, session) {
     return {
       label: 'Ready To Launch',
       tone: 'accent',
-      summary: 'The run is prepared and ready for browser assist or assistant fill help.',
+      summary: run.next_step || 'The run is prepared and ready for browser assist or assistant fill help.',
     };
   }
 

@@ -1,0 +1,67 @@
+{
+  "url": "https://jobs.lever.co/bonedry/332cc6ee-c299-4a91-b8b7-e535b802c707/apply",
+  "title": "Bone Dry Roofing - General Application",
+  "buttonTexts": [
+    "ATTACH RESUME/CV",
+    "Submit application"
+  ],
+  "fields": [
+    {
+      "tag": "input",
+      "type": "file",
+      "label": "Resume/CV",
+      "name": "resume",
+      "id": "resume-upload"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "label": "Full name✱",
+      "name": "name",
+      "id": "name"
+    },
+    {
+      "tag": "input",
+      "type": "email",
+      "label": "Email✱",
+      "name": "email",
+      "id": "email"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "label": "Phone✱",
+      "name": "phone",
+      "id": "phone"
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "label": "Current location✱",
+      "name": "location",
+      "id": "location"
+    },
+    {
+      "tag": "textarea",
+      "type": "textarea",
+      "label": "How did you hear about this position?",
+      "name": "source",
+      "id": "source"
+    },
+    {
+      "tag": "textarea",
+      "type": "textarea",
+      "label": "Are you legally authorized to work in the United States?",
+      "name": "authorization",
+      "id": "authorization"
+    },
+    {
+      "tag": "select",
+      "type": "select",
+      "label": "Gender",
+      "name": "eeo_gender",
+      "id": "eeo_gender"
+    }
+  ],
+  "bodyText": "Submit your application Resume/CV Full name Email Phone Current location LinkedIn URL GitHub URL Portfolio URL How did you hear about this position? Are you legally authorized to work in the United States? Gender Race Veteran status Disability status Submit application"
+}

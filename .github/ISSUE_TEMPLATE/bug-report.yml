@@ -1,0 +1,60 @@
+name: Bug report
+description: Report something broken in the app, installer, or workflow.
+title: "[Bug] "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting this. Please keep the report concrete so we can reproduce it quickly.
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Where did this happen?
+      options:
+        - Desktop app
+        - Tester bundle
+        - Source/dev setup
+        - Dashboard only
+        - Browser assist
+        - Assistant package / handoff
+    validations:
+      required: true
+  - type: textarea
+    id: summary
+    attributes:
+      label: What happened?
+      description: Tell us what you expected and what actually happened.
+      placeholder: I expected the app to..., but instead it...
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open...
+        2. Click...
+        3. See error...
+    validations:
+      required: true
+  - type: dropdown
+    id: assistant
+    attributes:
+      label: Which assistant were you using?
+      options:
+        - ChatGPT Desktop
+        - Claude Desktop Chat
+        - Codex
+        - Claude Code
+        - None
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Helpful extra context
+      description: Add screenshots, URLs, portal names, or logs if they help.
+

@@ -57,6 +57,7 @@ test('folder-connected agent handoff creates queue metadata and local launch fil
   assert.match(fs.readFileSync(promptPath, 'utf-8'), /Evaluate Opportunity/);
   assert.equal(snapshot.queued_count, 1);
   assert.equal(snapshot.latest_handoff?.adapter, 'folder_access');
+  assert.match(snapshot.latest_handoff?.prompt_text || '', /Evaluate Opportunity/);
 });
 
 test('chat upload adapter creates a ready-to-upload bundle with copied files', () => {
@@ -84,6 +85,8 @@ test('chat upload adapter creates a ready-to-upload bundle with copied files', (
   assert.match(fs.readFileSync(manifestPath, 'utf-8'), /draft_application_package/);
   assert.equal(result.bridge.latest_handoff?.adapter, 'chat_upload');
   assert.equal(result.bridge.latest_handoff?.upload_count >= 3, true);
+  assert.match((result.bridge.latest_handoff?.launch_notes || []).join('\n'), /Open a new chat in ChatGPT Desktop/);
+  assert.match(result.bridge.latest_handoff?.prompt_text || '', /chat-only assistant/i);
 });
 
 test('sourcing run handoff packages a search brief for connected assistants', () => {

@@ -1,10 +1,10 @@
-# Alpha Roadmap
+# Public Alpha Roadmap
 
-## Current Recommendation
+## Current Status
 
 `Job Hunter OS` is ready for a public alpha and design-partner testing cycle. It is not yet ready for a broad public launch with strong expectations of seamlessness across assistants, ATS portals, and first-run desktop install flows.
 
-## What Feels Strong Already
+## What Is Already Strong
 
 - local-first workspace and human-in-the-loop boundaries are clear
 - onboarding, sourcing, pipeline, drafting, application prep, and browser assist now form a real end-to-end product story
@@ -12,14 +12,14 @@
 - browser assist has real validation on Greenhouse, Ashby, and Workday-style flows
 - the dashboard is materially clearer than the earlier operator-console shape
 
-## What Still Gives Us Pause
+## Open Gaps
 
 ### Recovery And Guidance
 
 - users still need clearer explanations when a flow pauses on login, missing fields, portal ambiguity, or human-gated questions
 - the product should feel more like "here is exactly what to do next" and less like "interpret this system state"
 
-### Assistant Smoothness
+### Assistant Experience
 
 - connected assistants still have the cleanest path
 - chat-only users can succeed, but the experience still has more friction than the private relay-backed system
@@ -27,8 +27,8 @@
 
 ### ATS Reliability
 
-- Greenhouse, Ashby, and Workday behavior is promising, but coverage and confidence are not broad enough yet for a stronger public promise
-- more live validation is needed across Lever, SmartRecruiters, Workable, and edge-case custom forms
+- Greenhouse, Ashby, Workday, and now at least one live Workable flow are promising, but coverage and confidence are not broad enough yet for a stronger public promise
+- more live validation is needed across Lever, SmartRecruiters, additional Workable variants, and edge-case custom forms
 
 ### Sourcing Quality
 
@@ -43,7 +43,7 @@
 
 - docs, release notes, issue templates, and tester guidance should continue improving so alpha users know exactly what the product is and is not yet
 
-## Next Tranche
+## Near-Term Roadmap
 
 ### Phase A: Alpha Launch Hardening
 
@@ -80,6 +80,10 @@ Deliverables:
 - portal-specific selector hardening and upload behavior fixes
 - better required-field detection and final-review summarization
 - regression fixtures captured from real-world form variants
+
+Tracking artifact:
+
+- see [ATS Validation Matrix](ats-validation-matrix.md)
 
 ### Phase D: Assistant Experience Polish
 

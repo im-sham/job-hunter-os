@@ -1,0 +1,47 @@
+name: UX feedback
+description: Report confusion, friction, or wording that felt unclear.
+title: "[UX] "
+labels:
+  - ux
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template for confusing flows, unclear wording, or places where the app felt too dense or too technical.
+  - type: textarea
+    id: trying
+    attributes:
+      label: What were you trying to do?
+      placeholder: I was trying to import writing samples and then run a search...
+    validations:
+      required: true
+  - type: textarea
+    id: confusing
+    attributes:
+      label: What felt confusing or heavy?
+      placeholder: The wording around assistant packages was unclear because...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What would have felt clearer?
+      placeholder: I expected one main button that said...
+    validations:
+      required: true
+  - type: dropdown
+    id: audience
+    attributes:
+      label: How technical would you describe yourself?
+      options:
+        - Non-technical
+        - Somewhat technical
+        - Technical
+    validations:
+      required: true
+  - type: textarea
+    id: extras
+    attributes:
+      label: Extra context
+      description: Screenshots and wording suggestions are especially helpful.
+

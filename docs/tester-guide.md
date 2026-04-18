@@ -1,93 +1,93 @@
-# Tester Guide
+# Alpha Tester Guide
 
-This guide is for a first external tester using `Job Hunter OS` locally.
+This guide is for someone trying `Job Hunter OS` for the first time.
 
-## Fastest Way To Start
+## Best Install Path
 
-If you receive a tester bundle from the maintainer:
+For most non-technical testers, use the packaged macOS desktop app.
 
-1. Double-click `start.command`.
-2. Wait for the first local dependency install.
-3. Let the dashboard open automatically in your browser.
+### Option 1: Desktop App
 
-If you receive the desktop app package instead:
-
-1. Open the `.dmg` desktop installer.
+1. Open the `.dmg`.
 2. Drag `Job Hunter OS.app` into `Applications`.
 3. Open `Job Hunter OS.app`.
-4. If macOS blocks it, right-click and choose `Open`.
+4. If macOS blocks the first launch, right-click the app and choose `Open`.
 5. The app will create a local workspace in `~/Documents/Job Hunter OS Workspace`.
 
-If you are running from source instead of a prepared bundle:
+### Option 2: Tester Bundle
 
-1. Run `npm install`.
-2. Run `npm run tester:package` if you want the clean packaged handoff.
-3. Or run `npm run dashboard` to use the demo workspace directly.
+Use this only if you were given the bundle directly.
+
+1. Double-click `start.command`.
+2. Wait for dependencies to install the first time.
+3. Let the dashboard open automatically in your browser.
+
+This path still requires `Node.js` on the machine.
+
+### Option 3: Run From Source
+
+This is mainly for developers.
+
+```bash
+npm install
+npm run dashboard
+```
 
 ## Goal
 
-Get from raw materials to sourced jobs and then all the way to a near-submission application run without editing YAML files directly.
+The goal of this alpha is to see whether someone can move from raw materials to a near-submission application flow without editing YAML files or inventing their own process.
 
-## What To Test
+## Suggested First Run
 
-1. Import career material and writing samples from the dashboard.
-2. Save a basic search strategy in the dashboard.
-3. Save an application profile with safe answers and human-gated fields.
-4. Run a sourcing pass and review the roles it finds.
-5. Approve at least one role into the pipeline.
-6. Generate a task pack for that role.
-7. Prepare a handoff for the assistant they actually use.
-8. Start `Finish The Application`, attach the final resume, and launch fill help.
-9. Confirm the app makes the final human-review step obvious before submit.
+1. Choose your assistant.
+2. Import one or more resumes, LinkedIn exports, or bio documents.
+3. Import two or more writing samples.
+4. Click `Build Everything`.
+5. Fill in `Choose Your Job Targets`.
+6. Fill in `Save Reusable Application Details`.
+7. Click `Run Search With My Assistant`.
+8. Refresh and review the roles that come back.
+9. Approve at least one role into the pipeline.
+10. Generate assistant help for that role.
+11. Click `Prepare Assistant Package`.
+12. Use the package to continue in your assistant, or switch to browser assist in the apply flow.
+13. Confirm the app stops clearly for sensitive answers and final submit.
 
 ## Recommended Assistant Paths
 
 - `ChatGPT Desktop` or `Claude Desktop Chat`
-  Use the prepared upload bundle path.
+  Use the prepared upload bundle. The app should show the exact files to upload, the exact message to paste, and a recovery message if the assistant drifts.
 - `Codex` or `Claude Code`
   Use the connected workspace path.
 
-The product should recommend the path automatically after the tester chooses their assistant.
+The product should recommend the path automatically after the assistant is chosen.
 
-## Happy Path
+## What Good Looks Like
 
-1. Start the app and follow the highlighted step in `Setup Journey`.
-2. Add one or more background files in `Tell Us About Your Background`.
-3. Add two or more writing samples in `Teach Us How You Write`.
-4. Click `Build Everything` in `Build Your Starter Materials`.
-5. Fill in `Choose Your Job Targets`.
-6. Fill in `Save Reusable Application Details`.
-7. Click `Run Search With My Assistant` in `Find Jobs To Review`.
-8. Refresh and approve at least one sourced role into the pipeline.
-9. Choose that role in `Prepare An Assistant Package`.
-10. Generate `Review This Job` or `Draft Application Materials`.
-11. Click `Prepare Assistant Package`.
-12. Open `Finish The Application`.
-13. Confirm the direct apply link, then click `Start Application Prep`.
-14. Attach a final resume and optional cover letter.
-15. Choose either `Launch Browser Assist` or `Launch Assistant Fill Help`.
-16. If using browser assist, confirm it only fills safe fields and stops before final submit.
-17. After the browser or assistant reaches the stop point, click `Ready For Final Review`.
-18. Only after the live application is truly submitted, click `Mark Submitted`.
-
-## Success Criteria
-
-- The tester can complete the flow without touching YAML files.
-- The assistant recommendation feels obvious and low-friction.
-- The handoff bundle is clear enough that the tester knows exactly what to do next.
-- The application-prep flow makes it obvious what is safe to reuse and what still needs a human answer.
-- The local browser-assist option feels trustworthy and conservative rather than reckless.
-- The app recommends one obvious next move instead of making the tester choose between multiple equally weighted actions.
+- You can move through the product without touching config files directly.
+- The app gives one obvious next step instead of forcing you to choose from several equal-weight options.
+- The assistant handoff is clear enough that you do not have to invent your own prompt.
+- The sourcing review loop feels understandable.
+- The application flow makes it obvious what can be reused safely and what still needs human review.
 - The final submit boundary feels explicit and trustworthy.
-- Sensitive fields still remain clearly human-gated.
 
 ## What To Watch For
 
-- confusion about assistant choice
-- confusion about the difference between `Run Search With My Assistant` and the manual import fallback
-- confusion about safe answers vs human-gated fields
-- unclear opportunity-scoring inputs
-- unclear handoff instructions after clicking `Prepare Assistant Package` or `Launch Assistant Fill Help`
-- uncertainty about when browser assist should be used versus assistant fill help
-- uncertainty about when the user is supposed to click `Ready For Final Review` versus `Mark Submitted`
-- places where the tester still feels forced into a technical workflow
+- confusing wording
+- places where the product feels too dense
+- unclear install steps
+- unclear assistant setup or handoff steps
+- confusion about safe answers versus human-gated answers
+- uncertainty about when to use browser assist versus assistant fill help
+- uncertainty about when to click `Ready For Final Review` versus `Mark Submitted`
+- places where the app still feels too technical
+
+## Please Report
+
+If something feels confusing, include:
+
+- what you were trying to do
+- what you expected to happen
+- what actually happened
+- the assistant you were using
+- whether you were in the desktop app, tester bundle, or source version

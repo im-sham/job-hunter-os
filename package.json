@@ -7,7 +7,7 @@
   "license": "AGPL-3.0-only",
   "productName": "Job Hunter OS",
   "author": "Shamim Rehman (USMI Labs)",
-  "description": "Open-source extraction scaffold for Job Hunter OS, a local-first career operations system.",
+  "description": "Local-first desktop app for job search setup, sourcing, drafting, and human-reviewed application workflows.",
   "scripts": {
     "test": "node --test tests/*.test.mjs",
     "demo:init": "node packages/core/src/cli.mjs init --workspace demo/workspace --demo --force",

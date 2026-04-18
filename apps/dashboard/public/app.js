@@ -975,6 +975,7 @@ function renderJobsDetail(snapshot) {
 function renderSourcing(snapshot) {
   const sourcing = snapshot.sourcing || {};
   const latest = latestSourcingHandoff();
+  const sourcingGuidance = deriveSourcingGuidance(snapshot, latest);
 
   document.getElementById('sourcing-count').textContent = `${Number(sourcing.total_candidates || 0)} found`;
   document.getElementById('sourcing-helper-copy').textContent = `Using ${state.agentSetup?.assistant?.title || 'your chosen assistant'} via ${state.agentSetup?.mode_meta?.title || 'the recommended setup'}. If you want a different assistant for search, change it in Setup first.`;
@@ -995,7 +996,7 @@ function renderSourcing(snapshot) {
   if (!latest) {
     handoffPill.textContent = 'Not prepared';
     handoffPill.className = 'pill warning';
-    handoffList.innerHTML = '<p class="empty-state">No search package has been prepared yet. Click "Run Search With My Assistant" to create one.</p>';
+    handoffList.innerHTML = '<p class="empty-state">No search package has been prepared yet. Click Run Search With My Assistant first, then refresh after your assistant finishes the search.</p>';
   } else {
     handoffPill.textContent = `${titleCase(latest.status)} · ${latest.adapter_title}`;
     handoffPill.className = 'pill success';
@@ -1010,6 +1011,16 @@ function renderSourcing(snapshot) {
       </div>
     `).join('');
   }
+
+  const guidancePill = document.getElementById('sourcing-guidance-pill');
+  const guidanceSummary = document.getElementById('sourcing-guidance-summary');
+  const guidanceList = document.getElementById('sourcing-guidance-list');
+  const guidanceFootnote = document.getElementById('sourcing-guidance-footnote');
+  guidancePill.textContent = sourcingGuidance.pill;
+  guidancePill.className = sourcingGuidance.pillClass;
+  guidanceSummary.textContent = sourcingGuidance.summary;
+  guidanceList.innerHTML = renderGuidanceItems(sourcingGuidance.steps);
+  guidanceFootnote.textContent = sourcingGuidance.footnote;
 
   renderJobsWorkspace(snapshot);
 }
@@ -1287,10 +1298,385 @@ function renderApplicationReview(run) {
   };
 }
 
+function humanBoundarySummary(snapshot, run) {
+  const labels = (run?.manual_checkpoints?.map(item => item.label) || [])
+    .concat((snapshot?.human_gates || []).map(item => titleCase(item)))
+    .filter(Boolean);
+  const unique = [...new Set(labels)];
+  if (!unique.length) {
+    return 'Sensitive answers and the final submit step always stay with you.';
+  }
+  const visible = unique.slice(0, 3);
+  const more = unique.length - visible.length;
+  const joined = visible.join(', ');
+  return `Sensitive answers like ${joined}${more > 0 ? ', and others' : ''} always stay with you, and final submit is always manual.`;
+}
+
+function renderGuidanceItems(items = []) {
+  return items.map(item => `
+    <div class="checklist-item">
+      <strong>${escapeHtml(item)}</strong>
+    </div>
+  `).join('');
+}
+
+function deriveSourcingGuidance(snapshot, latest) {
+  const sourcing = snapshot.sourcing || {};
+  const pending = Number(sourcing.pending_count || 0);
+  const approved = Number(sourcing.approved_count || 0);
+  const dismissed = Number(sourcing.dismissed_count || 0);
+  const total = Number(sourcing.total_candidates || 0);
+
+  if (!latest) {
+    return {
+      pill: 'Start the search',
+      pillClass: 'pill warning',
+      summary: 'No assistant search package has been prepared yet, so the system has nothing to review.',
+      steps: [
+        'Click Run Search With My Assistant to create the search package.',
+        'Use that package with the assistant you chose in Setup.',
+        'Refresh Search Results after the assistant has written results back or after you import them manually.',
+      ],
+      footnote: 'If your assistant gives you a markdown or YAML report instead of writing into the workspace, use the manual import panel below.',
+    };
+  }
+
+  if (!total) {
+    return {
+      pill: 'Waiting on results',
+      pillClass: 'pill warning',
+      summary: 'The search package is ready, but no jobs have been loaded back into Job Hunter OS yet.',
+      steps: latest.adapter === 'chat_upload'
+        ? [
+            'Open the package folder and upload the prepared files to your assistant.',
+            'Paste the message from the prompt file and ask it to return search results in the package format.',
+            'Then refresh here or import the assistant output manually if it came back in chat.',
+          ]
+        : [
+            'Open your connected assistant in this workspace and point it at the latest search package.',
+            'Let it run the search and write the results back into the workspace files.',
+            'Then click Refresh Search Results to load the new queue.',
+          ],
+      footnote: 'If nothing shows up after a run, the easiest fallback is the manual import panel below this workspace.',
+    };
+  }
+
+  if (pending > 0) {
+    return {
+      pill: 'Review queue ready',
+      pillClass: 'pill success',
+      summary: `You have ${pending} role${pending === 1 ? '' : 's'} waiting for review, so the fastest move is to work through the queue on the left.`,
+      steps: [
+        'Open the strongest role in To Review.',
+        'Approve the good matches into your pipeline or dismiss the weak ones.',
+        'Use Continue In Apply only after a role is clearly worth pursuing.',
+      ],
+      footnote: approved
+        ? `${approved} role${approved === 1 ? '' : 's'} already made it into your active pipeline.`
+        : 'You can run another search later, but the highest-value work now is reviewing the current queue.',
+    };
+  }
+
+  if (approved > 0) {
+    return {
+      pill: 'Queue is clear',
+      pillClass: 'pill accent',
+      summary: 'There are no more roles waiting for review right now. The best next move is to work your approved pipeline roles.',
+      steps: [
+        'Switch to Pipeline on the left.',
+        'Select a role and either prepare an assistant package or continue in Apply.',
+        'Run another search only after you want more options in the queue.',
+      ],
+      footnote: dismissed
+        ? `${dismissed} role${dismissed === 1 ? '' : 's'} were dismissed in this batch, so the review loop is complete.`
+        : 'Your latest search batch has already been processed.',
+    };
+  }
+
+  return {
+    pill: 'Run another search',
+    pillClass: 'pill accent',
+    summary: 'This search batch no longer has anything actionable in it.',
+    steps: [
+      'Run a fresh search with your assistant.',
+      'Or import another search report manually.',
+      'Then review the new queue when it appears.',
+    ],
+    footnote: 'A cleared search queue is normal once everything has been approved or dismissed.',
+  };
+}
+
+function deriveHandoffGuidance({ snapshot, opportunity, pack, latest, agentSetup }) {
+  const assistantTitle = agentSetup?.assistant?.title || 'your assistant';
+
+  if (!opportunity) {
+    return {
+      pill: 'Choose a role',
+      pillClass: 'pill warning',
+      summary: 'There is no pipeline role selected yet, so the app cannot package assistant help.',
+      steps: [
+        'Approve a role into the pipeline from the Jobs review queue.',
+        'Select that role in the Jobs workspace.',
+        'Then choose the task you want help with.',
+      ],
+      footnote: 'The assistant package always follows the currently selected pipeline role.',
+    };
+  }
+
+  if (!pack) {
+    return {
+      pill: 'Choose the task',
+      pillClass: 'pill warning',
+      summary: 'The role is selected, but the task-specific message has not been generated yet.',
+      steps: [
+        'Pick Review This Job, Draft Application Materials, or Prepare Submission Help.',
+        'Read the generated message and checklist first.',
+        'Then click Prepare Assistant Package.',
+      ],
+      footnote: 'The package is easier to use once the task-specific message already looks right to you.',
+    };
+  }
+
+  if (!latest) {
+    return {
+      pill: 'Package not built',
+      pillClass: 'pill warning',
+      summary: `The task message is ready, but ${assistantTitle} does not have a packaged handoff yet.`,
+      steps: [
+        'Click Prepare Assistant Package.',
+        'Open the package folder or copy the assistant instructions.',
+        'Refresh the dashboard after the assistant finishes the safe portion of the work.',
+      ],
+      footnote: 'This turns the message into a cleaner bundle so you do not have to assemble context by hand.',
+    };
+  }
+
+  if ((latest.missing_files || []).length) {
+    return {
+      pill: 'Rebuild package',
+      pillClass: 'pill warning',
+      summary: 'The latest package was created, but some referenced files were missing when it was built.',
+      steps: [
+        `Generate or attach the missing files: ${(latest.missing_files || []).slice(0, 3).join(', ')}`,
+        'Prepare the assistant package again after those files exist.',
+        'Then continue with the refreshed bundle instead of the older one.',
+      ],
+      footnote: 'Using an incomplete package can make the assistant miss important context.',
+    };
+  }
+
+  if (latest.adapter === 'chat_upload') {
+    return {
+      pill: 'Upload package ready',
+      pillClass: 'pill success',
+      summary: `The package is ready for ${assistantTitle}. The remaining work is outside the app in your chat assistant.`,
+      steps: [
+        'Open the package folder and upload the prepared files from the uploads directory.',
+        'Paste the message from the prompt file.',
+        'Stop for sensitive answers and before final submit, then come back here and refresh.',
+      ],
+      footnote: 'If the assistant responds in a separate chat, use Copy Assistant Instructions so you do not have to interpret the handoff yourself.',
+    };
+  }
+
+  return {
+    pill: 'Connected package ready',
+    pillClass: 'pill success',
+    summary: `The package is ready for ${assistantTitle} with direct workspace access.`,
+    steps: [
+      'Open the connected assistant in this workspace.',
+      'Point it to the task pack or prompt file shown above.',
+      'Refresh the dashboard after it reaches a meaningful checkpoint or final review stop.',
+    ],
+    footnote: 'The package still expects the assistant to stop for sensitive answers and before final submit.',
+  };
+}
+
+function deriveApplicationPauseGuidance({ snapshot, run, browserAssistMeta, latestHandoff }) {
+  const browserSession = run?.browser_assist || null;
+  const details = run?.browser_assist_details || null;
+  const nextStep = details?.next_step || browserSession?.next_step || run?.next_step || '';
+  const nextStepLower = String(nextStep || '').toLowerCase();
+  const manualItems = details?.manual_review_items || [];
+  const blockers = details?.unresolved_required_fields || [];
+  const boundarySummary = humanBoundarySummary(snapshot, run);
+  const finalBoundaryNote = `${boundarySummary} Use Ready For Final Review after the helper stops. Use Mark Submitted only after you personally submit the live application.`;
+
+  if (!run) {
+    return {
+      pill: 'Nothing paused yet',
+      pillClass: 'pill warning',
+      summary: 'There is no live application run yet, so the app has nothing to pause or recover from.',
+      steps: [
+        'Select a pipeline role.',
+        'Start Application Prep to create the packet and checklist.',
+        'Then choose browser assist or assistant fill help.',
+      ],
+      footnote: finalBoundaryNote,
+    };
+  }
+
+  if (run.status === 'submitted') {
+    return {
+      pill: 'Finished',
+      pillClass: 'pill success',
+      summary: 'This run is already marked submitted, so there is nothing left to recover here.',
+      steps: [
+        'Wait for recruiter response.',
+        'Log any outcome or feedback when it arrives.',
+      ],
+      footnote: 'You can still review the packet and log if you want to revisit what happened.',
+    };
+  }
+
+  if (run.status === 'awaiting_final_confirmation') {
+    return {
+      pill: 'Intentional stop point',
+      pillClass: 'pill success',
+      summary: 'The app paused on purpose at the final-review boundary. This is the last safe stop before a human submits.',
+      steps: [
+        'Open the live application and verify every field, attachment, and portal-specific answer manually.',
+        'Use Ready For Final Review only when the helper has done everything safe to do.',
+        'After you personally click submit in the live form, come back and click Mark Submitted.',
+      ],
+      footnote: finalBoundaryNote,
+    };
+  }
+
+  if (run.status === 'manual_review_required') {
+    if (/captcha|verification|sign in|login|required before the application can continue|account|password/.test(nextStepLower)) {
+      return {
+        pill: 'Human portal step',
+        pillClass: 'pill warning',
+        summary: nextStep || 'The portal asked for a login, account, or verification step that automation should not try to push through.',
+        steps: [
+          'Open the live application and clear that login or verification step yourself.',
+          'Then either continue manually or use assistant fill help for the remaining safe work.',
+          'Return here once the form is back at a normal review state.',
+        ],
+        footnote: finalBoundaryNote,
+      };
+    }
+
+    if (manualItems.length) {
+      return {
+        pill: 'Needs your answer',
+        pillClass: 'pill warning',
+        summary: nextStep || 'The app stopped at one or more questions it should not answer without you.',
+        steps: [
+          'Review the manual-review items listed above and answer those in the live application yourself.',
+          'Let the helper handle only the safe fields around them.',
+          'Then use Ready For Final Review when the safe work is finished.',
+        ],
+        footnote: finalBoundaryNote,
+      };
+    }
+
+    if (blockers.length) {
+      return {
+        pill: 'Missing required answer',
+        pillClass: 'pill warning',
+        summary: nextStep || 'The app found required fields it could not answer confidently enough to continue.',
+        steps: [
+          'Open the live application and clear the remaining required fields manually.',
+          latestHandoff
+            ? 'If you still want help, continue with the prepared assistant package for the safe surrounding fields.'
+            : 'If you want extra help, prepare assistant fill help before returning to the live form.',
+          'Then come back here and move the run to final review when the form is ready.',
+        ],
+        footnote: finalBoundaryNote,
+      };
+    }
+
+    return {
+      pill: 'Human checkpoint',
+      pillClass: 'pill warning',
+      summary: nextStep || 'The app hit a checkpoint that needs a human before it should continue.',
+      steps: [
+        'Open the live application and review the current step yourself.',
+        'Continue manually or switch to assistant fill help if that is easier.',
+        'Come back here once the application is ready for final review.',
+      ],
+      footnote: finalBoundaryNote,
+    };
+  }
+
+  if (run.status === 'browser_assist_error') {
+    return {
+      pill: 'Use the fallback path',
+      pillClass: 'pill danger',
+      summary: browserSession?.error
+        ? `Browser assist hit an issue: ${browserSession.error}`
+        : 'Browser assist ran into a portal problem, so the safer next move is assistant fill help or a manual pass.',
+      steps: [
+        latestHandoff ? 'Use the already prepared assistant package to continue from the live application.' : 'Prepare assistant fill help for this run.',
+        'Stop again before final submit.',
+        'Then come back here for the final human review step.',
+      ],
+      footnote: finalBoundaryNote,
+    };
+  }
+
+  if (run.status === 'assistant_in_progress') {
+    return {
+      pill: 'Waiting on assistant',
+      pillClass: 'pill accent',
+      summary: 'The assistant package is already in progress or ready to use outside the app.',
+      steps: [
+        'Continue the safe work in your assistant using the latest package.',
+        'Refresh the dashboard when the assistant reaches a clear stopping point.',
+        'Use Ready For Final Review only after the assistant has stopped and you have checked the live form.',
+      ],
+      footnote: finalBoundaryNote,
+    };
+  }
+
+  if (run.status === 'browser_assist_in_progress') {
+    return {
+      pill: 'Waiting on browser assist',
+      pillClass: 'pill accent',
+      summary: nextStep || 'Local browser assist is still working through the safe part of the form.',
+      steps: [
+        'Watch the browser until it reaches a clear pause or final review stop.',
+        'Refresh the dashboard after that checkpoint.',
+        'If the browser path feels unreliable, switch to assistant fill help instead.',
+      ],
+      footnote: finalBoundaryNote,
+    };
+  }
+
+  if (!browserAssistMeta.available) {
+    return {
+      pill: 'Assistant path recommended',
+      pillClass: 'pill warning',
+      summary: 'Local browser assist is unavailable on this computer, so assistant fill help is the simpler recovery path.',
+      steps: [
+        'Prepare assistant fill help instead of launching browser assist.',
+        'Use the packet, checklist, and attached files with your assistant.',
+        'Stop again before final submit and come back here for final review.',
+      ],
+      footnote: finalBoundaryNote,
+    };
+  }
+
+  return {
+    pill: 'Ready to continue',
+    pillClass: 'pill accent',
+    summary: 'Nothing is blocked right now. The run is waiting for you to choose the next safe helper path.',
+    steps: [
+      'Launch browser assist if you want the app to handle the easy fields locally.',
+      'Or use assistant fill help if you prefer your assistant to guide the live form.',
+      'In both cases, stop before final submit and return here for review.',
+    ],
+    footnote: finalBoundaryNote,
+  };
+}
+
 function deriveApplicationGuidance({ opportunity, run, browserAssistMeta, latestHandoff }) {
   if (!opportunity) {
     return {
       pill: 'Add a job first',
+      pillClass: 'pill warning',
       summary: 'Approve or add a job before the app can guide the application flow.',
       steps: [
         'Add a job in Find Jobs To Review or approve one from the review queue.',
@@ -1312,6 +1698,7 @@ function deriveApplicationGuidance({ opportunity, run, browserAssistMeta, latest
   if (!run) {
     return {
       pill: 'Start here',
+      pillClass: 'pill accent',
       summary: 'Create the application-prep run first so the app can gather safe reusable fields, manual checkpoints, and the live application packet.',
       steps: [
         'Confirm the apply link for this job.',
@@ -1330,6 +1717,7 @@ function deriveApplicationGuidance({ opportunity, run, browserAssistMeta, latest
   if (!applyUrl) {
     return {
       pill: 'Needs apply link',
+      pillClass: 'pill warning',
       summary: 'The app needs the direct application URL before it can launch browser assist or assistant fill help.',
       steps: [
         'Paste the live application URL into the apply-link field above.',
@@ -1347,6 +1735,7 @@ function deriveApplicationGuidance({ opportunity, run, browserAssistMeta, latest
   if (!hasResume) {
     return {
       pill: 'Attach files',
+      pillClass: 'pill warning',
       summary: 'Attach the final resume before the app tries to help with the live form.',
       steps: [
         'Upload the final resume you want used for this job.',
@@ -1365,6 +1754,7 @@ function deriveApplicationGuidance({ opportunity, run, browserAssistMeta, latest
   if (run.status === 'submitted') {
     return {
       pill: 'Complete',
+      pillClass: 'pill success',
       summary: 'This application is already marked submitted.',
       steps: [
         'Watch for recruiter response.',
@@ -1382,6 +1772,7 @@ function deriveApplicationGuidance({ opportunity, run, browserAssistMeta, latest
   if (run.status === 'awaiting_final_confirmation') {
     return {
       pill: 'Final human review',
+      pillClass: 'pill success',
       summary: 'The app has reached the handoff point. Review the live application, submit it yourself, then mark it submitted here.',
       steps: [
         'Open the live application page.',
@@ -1400,6 +1791,7 @@ function deriveApplicationGuidance({ opportunity, run, browserAssistMeta, latest
   if (run.status === 'manual_review_required') {
     return {
       pill: 'Needs your input',
+      pillClass: 'pill warning',
       summary: 'The system paused because the live form hit a question or step that still needs a human answer.',
       steps: [
         'Open the live application.',
@@ -1418,6 +1810,7 @@ function deriveApplicationGuidance({ opportunity, run, browserAssistMeta, latest
   if (run.status === 'browser_assist_in_progress') {
     return {
       pill: 'Browser assist running',
+      pillClass: 'pill accent',
       summary: 'The local browser-assist path has already been launched. Refresh after it reaches a new stop point or final review.',
       steps: [
         'Check the browser assist status and log below.',
@@ -1435,6 +1828,7 @@ function deriveApplicationGuidance({ opportunity, run, browserAssistMeta, latest
   if (run.status === 'assistant_in_progress') {
     return {
       pill: 'Assistant package ready',
+      pillClass: 'pill accent',
       summary: 'Assistant fill help has already been prepared for this application.',
       steps: [
         'Use the assistant package or uploaded bundle outside the app.',
@@ -1452,6 +1846,7 @@ function deriveApplicationGuidance({ opportunity, run, browserAssistMeta, latest
   if (run.status === 'browser_assist_error') {
     return {
       pill: 'Alternate path recommended',
+      pillClass: 'pill danger',
       summary: 'Browser assist hit an issue, so the clearest next move is to use assistant fill help instead.',
       steps: [
         'Prepare the application fill-help package.',
@@ -1472,6 +1867,7 @@ function deriveApplicationGuidance({ opportunity, run, browserAssistMeta, latest
   if (browserAvailable) {
     return {
       pill: 'Recommended',
+      pillClass: 'pill accent',
       summary: 'Local browser assist is the simplest path from here because it can open the live application and safely prefill the easy fields for you.',
       steps: [
         'Open the live application in local Chrome.',
@@ -1489,6 +1885,7 @@ function deriveApplicationGuidance({ opportunity, run, browserAssistMeta, latest
 
   return {
     pill: 'Recommended',
+    pillClass: 'pill accent',
     summary: 'Assistant fill help is the best next path on this machine because local browser assist is not available.',
     steps: [
       'Prepare the application fill-help package.',
@@ -1536,6 +1933,10 @@ function renderApplicationRuns(snapshot) {
   const browserAssistSummary = document.getElementById('browser-assist-summary');
   const browserAssistList = document.getElementById('browser-assist-list');
   const browserAssistButton = document.getElementById('launch-browser-assist');
+  const pausePill = document.getElementById('application-pause-pill');
+  const pauseSummary = document.getElementById('application-pause-summary');
+  const pauseList = document.getElementById('application-pause-list');
+  const pauseFootnote = document.getElementById('application-pause-footnote');
   const browserAssistMeta = state.browserAssist || {
     available: false,
     summary: 'Browser assist status unavailable.',
@@ -1553,6 +1954,12 @@ function renderApplicationRuns(snapshot) {
   if (!opportunity) {
     state.applicationGuidance = deriveApplicationGuidance({
       opportunity: null,
+      run: null,
+      browserAssistMeta,
+      latestHandoff: null,
+    });
+    const pauseGuidance = deriveApplicationPauseGuidance({
+      snapshot: state.snapshot,
       run: null,
       browserAssistMeta,
       latestHandoff: null,
@@ -1592,17 +1999,18 @@ function renderApplicationRuns(snapshot) {
     browserAssistList.innerHTML = '<p class="empty-state">Choose a job and start application prep before you launch browser assist.</p>';
     browserAssistButton.disabled = true;
     guidancePill.textContent = state.applicationGuidance.pill;
-    guidancePill.className = 'pill warning';
+    guidancePill.className = state.applicationGuidance.pillClass || 'pill warning';
     guidanceSummary.textContent = state.applicationGuidance.summary;
-    guidanceList.innerHTML = state.applicationGuidance.steps.map(item => `
-      <div class="checklist-item">
-        <strong>${escapeHtml(item)}</strong>
-      </div>
-    `).join('');
+    guidanceList.innerHTML = renderGuidanceItems(state.applicationGuidance.steps);
     guidanceFootnote.textContent = state.applicationGuidance.footnote;
     guidanceButton.textContent = state.applicationGuidance.action.label;
     guidanceButton.disabled = true;
     guidanceButton.dataset.actionType = state.applicationGuidance.action.type;
+    pausePill.textContent = pauseGuidance.pill;
+    pausePill.className = pauseGuidance.pillClass;
+    pauseSummary.textContent = pauseGuidance.summary;
+    pauseList.innerHTML = renderGuidanceItems(pauseGuidance.steps);
+    pauseFootnote.textContent = pauseGuidance.footnote;
     document.getElementById('application-handoff-list').innerHTML = '<p class="empty-state">Launch assistant fill help after your application prep run is ready.</p>';
     return;
   }
@@ -1626,6 +2034,12 @@ function renderApplicationRuns(snapshot) {
   const manualFields = run?.manual_checkpoints || [];
   const browserSession = run?.browser_assist || null;
   const reviewState = renderApplicationReview(run || null);
+  const pauseGuidance = deriveApplicationPauseGuidance({
+    snapshot: state.snapshot,
+    run,
+    browserAssistMeta,
+    latestHandoff: latest,
+  });
   const canLaunchFillHelp = Boolean(run?.portal?.apply_url && run?.artifacts?.resume && run?.status !== 'submitted');
 
   queueButton.disabled = !canLaunchFillHelp;
@@ -1745,23 +2159,25 @@ function renderApplicationRuns(snapshot) {
     latestHandoff: latest,
   });
   guidancePill.textContent = state.applicationGuidance.pill;
-  guidancePill.className = state.applicationGuidance.action.type === 'none' ? 'pill success' : 'pill accent';
+  guidancePill.className = state.applicationGuidance.pillClass
+    || (state.applicationGuidance.action.type === 'none' ? 'pill success' : 'pill accent');
   guidanceSummary.textContent = state.applicationGuidance.summary;
-  guidanceList.innerHTML = state.applicationGuidance.steps.map(item => `
-    <div class="checklist-item">
-      <strong>${escapeHtml(item)}</strong>
-    </div>
-  `).join('');
+  guidanceList.innerHTML = renderGuidanceItems(state.applicationGuidance.steps);
   guidanceFootnote.textContent = state.applicationGuidance.footnote;
   guidanceButton.textContent = state.applicationGuidance.action.label;
   guidanceButton.disabled = Boolean(state.applicationGuidance.action.disabled);
   guidanceButton.dataset.actionType = state.applicationGuidance.action.type;
+  pausePill.textContent = pauseGuidance.pill;
+  pausePill.className = pauseGuidance.pillClass;
+  pauseSummary.textContent = pauseGuidance.summary;
+  pauseList.innerHTML = renderGuidanceItems(pauseGuidance.steps);
+  pauseFootnote.textContent = pauseGuidance.footnote;
 
   if (!latest) {
     handoffPill.textContent = 'Not prepared';
     handoffPill.className = 'pill warning';
     document.getElementById('application-handoff-list').innerHTML = run
-      ? '<p class="empty-state">Launch assistant fill help after your final resume is attached and the apply link is confirmed.</p>'
+      ? '<p class="empty-state">Prepare assistant fill help after your final resume is attached and the apply link is confirmed. The package will tell your assistant to stop before sensitive answers and final submit.</p>'
       : '<p class="empty-state">Start application prep first so the app can build the submission packet and checklist.</p>';
     return;
   }
@@ -1787,9 +2203,20 @@ function renderBridge() {
   const adapter = (bridge.adapters || []).find(item => item.id === state.agentMode) || bridge.adapters?.[0];
   const taskHandoffs = generalTaskHandoffs();
   const latest = taskHandoffs[0] || null;
+  const opportunity = selectedOpportunity(state.snapshot);
+  const pack = opportunity && state.taskPack?.opportunity?.id === opportunity.id ? state.taskPack : null;
+  const handoffGuidance = deriveHandoffGuidance({
+    snapshot: state.snapshot,
+    opportunity,
+    pack,
+    latest,
+    agentSetup: state.agentSetup,
+  });
   const queueButton = document.getElementById('queue-task-handoff');
   const copyPathButton = document.getElementById('copy-handoff-path');
   const copyNotesButton = document.getElementById('copy-handoff-notes');
+  const copyMessageButton = document.getElementById('copy-handoff-message');
+  const copyRecoveryButton = document.getElementById('copy-handoff-recovery');
   const bridgePill = document.getElementById('bridge-pill');
   const bridgeQueuePill = document.getElementById('bridge-queue-pill');
 
@@ -1805,16 +2232,28 @@ function renderBridge() {
   queueButton.disabled = !state.taskPack;
   copyPathButton.disabled = !latest;
   copyNotesButton.disabled = !latest;
+  copyMessageButton.disabled = !latest;
+  copyRecoveryButton.disabled = !latest;
 
   const summaryList = document.getElementById('handoff-summary-list');
+  const uploadList = document.getElementById('handoff-upload-list');
+  const messageBox = document.getElementById('handoff-message');
   const notesList = document.getElementById('handoff-notes-list');
   const queueList = document.getElementById('bridge-queue-list');
   const statusPill = document.getElementById('handoff-status-pill');
+  const guidancePill = document.getElementById('handoff-guidance-pill');
+  const guidanceSummary = document.getElementById('handoff-guidance-summary');
+  const guidanceList = document.getElementById('handoff-guidance-list');
+  const recoveryBox = document.getElementById('handoff-recovery-message');
+  const guidanceFootnote = document.getElementById('handoff-guidance-footnote');
 
   if (!latest) {
     statusPill.textContent = 'Awaiting handoff';
     statusPill.className = 'pill warning';
     summaryList.innerHTML = '<p class="empty-state">No assistant package has been prepared yet. Generate a task and then prepare the package here.</p>';
+    uploadList.innerHTML = '<p class="empty-state">When a package is ready, this section will show the exact files to upload or reference.</p>';
+    messageBox.value = 'Prepare a package to load the exact message you can paste into your assistant.';
+    recoveryBox.value = handoffRecoveryMessage(null);
     notesList.innerHTML = '<p class="empty-state">Simple next-step instructions will appear here once a package is ready.</p>';
   } else {
     statusPill.textContent = `${titleCase(latest.status)} · ${latest.adapter_title}`;
@@ -1834,6 +2273,19 @@ function renderBridge() {
         <strong>${escapeHtml(item)}</strong>
       </div>
     `).join('');
+    uploadList.innerHTML = latest.upload_count
+      ? (latest.upload_files || []).map(file => `
+        <div class="checklist-item">
+          <strong>${escapeHtml(file.bundle_relative_path)}</strong>
+          <span>${escapeHtml(file.source_relative_path)}</span>
+        </div>
+      `).join('')
+      : `<div class="checklist-item">
+          <strong>No uploads required.</strong>
+          <span>${escapeHtml(latest.assistant_title || latest.adapter_title)} can work from the local workspace directly.</span>
+        </div>`;
+    messageBox.value = latest.prompt_text || 'The package message is not available yet.';
+    recoveryBox.value = handoffRecoveryMessage(latest);
     notesList.innerHTML = (latest.launch_notes || []).map(note => `
       <div class="checklist-item">
         <strong>${escapeHtml(note)}</strong>
@@ -1849,6 +2301,12 @@ function renderBridge() {
       <small>${escapeHtml(formatTimestamp(handoff.created_at))}</small>
     </div>
   `).join('') : '<p class="empty-state">No queued handoffs yet.</p>';
+
+  guidancePill.textContent = handoffGuidance.pill;
+  guidancePill.className = handoffGuidance.pillClass;
+  guidanceSummary.textContent = handoffGuidance.summary;
+  guidanceList.innerHTML = renderGuidanceItems(handoffGuidance.steps);
+  guidanceFootnote.textContent = handoffGuidance.footnote;
 }
 
 function renderOnboarding(snapshot) {
@@ -2448,6 +2906,39 @@ function latestHandoff() {
   return generalTaskHandoffs()[0] || null;
 }
 
+function handoffRecoveryMessage(handoff) {
+  if (!handoff) {
+    return 'Prepare a package first. Then this box will show a recovery message you can paste into your assistant if it drifts from the task.';
+  }
+
+  const base = [
+    'Please ignore any earlier assumptions and use only the files from the Job Hunter OS package plus the pasted instructions.',
+    'If anything is missing, ask me for the exact file or answer you still need instead of guessing.',
+  ];
+
+  if (handoff.task_type === 'source_opportunities') {
+    return [
+      ...base,
+      'Return results as either a structured YAML queue matching the included template or a clean markdown table with one job per row.',
+      'Do not give me only a summary paragraph. I need structured results I can review or import.',
+    ].join('\n');
+  }
+
+  if (handoff.task_type === 'application_fill_help') {
+    return [
+      ...base,
+      'Use the uploaded packet and attachments to help with the live application, but stop on login walls, legal questions, EEO questions, work authorization, compensation, and final submit.',
+      'If you reach one of those boundaries, tell me exactly what needs my manual review next.',
+    ].join('\n');
+  }
+
+  return [
+    ...base,
+    'Follow the packaged checklist exactly and keep all sensitive answers and submissions under human approval.',
+    'If the package is missing something, tell me the specific gap before you continue.',
+  ].join('\n');
+}
+
 async function copyLatestHandoffPath() {
   const handoff = latestHandoff();
   if (!handoff) {
@@ -2487,6 +2978,40 @@ async function copyLatestHandoffNotes() {
     addActivity('Copied launch notes for the latest handoff.', 'success');
   } catch (error) {
     setStatus('Clipboard copy failed. You can still copy the notes manually.', 'error');
+  }
+}
+
+async function copyLatestHandoffMessage() {
+  const handoff = latestHandoff();
+  if (!handoff) {
+    setStatus('Prepare a handoff first so there is a message to copy.', 'error');
+    return;
+  }
+
+  if (!handoff.prompt_text) {
+    setStatus('The handoff message is not available yet. Try preparing the package again.', 'error');
+    return;
+  }
+
+  try {
+    await navigator.clipboard.writeText(handoff.prompt_text);
+    setStatus('Assistant message copied to your clipboard.', 'success');
+    addActivity('Copied the latest assistant message.', 'success');
+  } catch (error) {
+    setStatus('Clipboard copy failed. You can still copy the message manually.', 'error');
+  }
+}
+
+async function copyLatestHandoffRecovery() {
+  const handoff = latestHandoff();
+  const payload = handoffRecoveryMessage(handoff);
+
+  try {
+    await navigator.clipboard.writeText(payload);
+    setStatus('Recovery message copied to your clipboard.', 'success');
+    addActivity('Copied the assistant recovery message.', 'success');
+  } catch (error) {
+    setStatus('Clipboard copy failed. You can still copy the recovery message manually.', 'error');
   }
 }
 
@@ -2793,6 +3318,14 @@ function registerEvents() {
 
   document.getElementById('copy-handoff-notes').addEventListener('click', () => {
     copyLatestHandoffNotes().catch(() => {});
+  });
+
+  document.getElementById('copy-handoff-message').addEventListener('click', () => {
+    copyLatestHandoffMessage().catch(() => {});
+  });
+
+  document.getElementById('copy-handoff-recovery').addEventListener('click', () => {
+    copyLatestHandoffRecovery().catch(() => {});
   });
 
   document.getElementById('preview-browser-assist-log').addEventListener('click', () => {
